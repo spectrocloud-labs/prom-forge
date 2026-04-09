@@ -1,0 +1,7 @@
+metrics:
+- name: "prom_forge_exporter_gpu"
+  type: "gauge"
+  utilizationPattern: "steady"
+  labels:
+  - hello: world
+  interval: 5s
