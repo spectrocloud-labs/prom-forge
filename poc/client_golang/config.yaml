@@ -1,0 +1,9 @@
+prometheus:
+  remote_write_url: "http://localhost:9090/api/v1/write"
+metrics:
+- name: "prom_forge_client_golang_gpu"
+  type: "gauge"
+  utilizationPattern: "steady"
+  labels:
+  - hello: world
+  interval: 5s
