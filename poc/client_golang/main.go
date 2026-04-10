@@ -28,7 +28,12 @@ func main() {
 	}
 
 	sym := writev2.NewSymbolTable()
-	labelsRefs := []string{"__name__", "prom_forge_client_golang_gpu"}
+	labelsRefs := []string{
+		"__name__", "prom_forge_client_golang_gpu",
+		"host", "node-01",
+		"gpu", "0",
+		"region", "us-east-1",
+	}
 	help := "prom_forge_client_golang_gpu help"
 	unit := "_ratio"
 
