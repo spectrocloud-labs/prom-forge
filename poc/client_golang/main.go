@@ -12,8 +12,6 @@ import (
 	writev2 "github.com/prometheus/client_golang/exp/api/remote/genproto/v2"
 )
 
-// TODO: get this working, remote_write v2 metadata is not accessible in the prometheus API or UI at the moment.
-
 func main() {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
