@@ -11,28 +11,28 @@ metrics:
       min: 1.0
     # oscillate between 2 values rapidly
     oscillating:
-      sustainValue: 100.0
-      minValue: 1.0
-      minCount: 1
-      sustainCount: 1
-      dropSteps: 1
-      riseSteps: 1
-    # oscillate between 2 values, sustained high then cliff drop then rise back to sustained high
+      y1: 100.0
+      y1Count: 1
+      y2: 1.0
+      y2Count: 1
+      y1y2StepCount: 0
+      y2y1StepCount: 0
+    # oscillate between 2 values, sustained high then cliff drop then jump back up to sustained high
     oscillating:
-      sustainValue: 100.0
-      minValue: 10.0
-      minCount: 3
-      sustainCount: 10
-      dropSteps: 3
-      riseSteps: 1
+      y1: 100.0
+      y1Count: 10
+      y2: 10.0
+      y2Count: 3
+      y1y2StepCount: 5
+      y2y1StepCount: 0
     # oscillate between 2 values, sustained low then spike up then drop back to sustained low
     oscillating:
-      sustainValue: 10.0
-      minValue: 100.0
-      minCount: 3
-      sustainCount: 10
-      dropSteps: 3
-      riseSteps: 1
+      y1: 10.0
+      y1Count: 10
+      y2: 100.0
+      y2Count: 3
+      y1y2StepCount: 5
+      y2y1StepCount: 0
   labels:
   - node: edge-ffa238429efe572a777ef4a17e4fd9b7
   interval: 5s

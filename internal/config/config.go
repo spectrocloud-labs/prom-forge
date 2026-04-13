@@ -35,10 +35,10 @@ type RandomUtilizationPattern struct {
 
 // OscillatingUtilizationPattern defines the oscillating utilization pattern.
 type OscillatingUtilizationPattern struct {
-	SustainValue float64 `mapstructure:"sustainValue" yaml:"sustainValue"`
-	MinValue     float64 `mapstructure:"minValue" yaml:"minValue"`
-	MinCount     int     `mapstructure:"minCount" yaml:"minCount"`
-	SustainCount int     `mapstructure:"sustainCount" yaml:"sustainCount"`
-	DropSteps    int     `mapstructure:"dropSteps" yaml:"dropSteps"`
-	RiseSteps    int     `mapstructure:"riseSteps" yaml:"riseSteps"`
+	Y1            float64 `mapstructure:"y1" yaml:"y1"`
+	Y1Count       int     `mapstructure:"y1Count" yaml:"y1Count"`
+	Y2            float64 `mapstructure:"y2" yaml:"y2"`
+	Y2Count       int     `mapstructure:"y2Count" yaml:"y2Count"`
+	Y1Y2StepCount int     `mapstructure:"y1y2StepCount" yaml:"y1y2StepCount"`
+	Y2Y1StepCount int     `mapstructure:"y2y1StepCount" yaml:"y2y1StepCount"`
 }

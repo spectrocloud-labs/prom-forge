@@ -31,40 +31,40 @@ func RandomUtilization(args config.RandomUtilizationPattern) iter.Seq[float64] {
 
 // OscillatingUtilization is an iterator that oscillates between 2 values given the oscillating utilization pattern arguments
 func OscillatingUtilization(args config.OscillatingUtilizationPattern) iter.Seq[float64] {
-	sustainValue := args.SustainValue
-	minValue := args.MinValue
-	minCount := args.MinCount
-	sustainCount := args.SustainCount
-	dropSteps := args.DropSteps
-	riseSteps := args.RiseSteps
+	y1 := args.Y1
+	y1Count := args.Y1Count
+	y2 := args.Y2
+	y2Count := args.Y2Count
+	y1y2StepCount := args.Y1Y2StepCount
+	y2y1StepCount := args.Y2Y1StepCount
 	return func(yield func(float64) bool) {
 		for {
-			// sustain
-			for range sustainCount {
-				if !yield(sustainValue) {
+			// sustain y1 for y1Count data points
+			for range y1Count {
+				if !yield(y1) {
 					return
 				}
 			}
 
-			// drop
-			for step := range dropSteps + 1 {
-				t := float64(step) / float64(dropSteps)
-				if !yield(sustainValue + (minValue-sustainValue)*t) {
+			// raise or fall from y1 to y2 at the y1y2StepCount
+			for step := 1; step <= y1y2StepCount; step++ {
+				t := float64(step) / float64(y1y2StepCount)
+				if !yield(y1 + (y2-y1)*t) {
 					return
 				}
 			}
 
-			// min sustain
-			for range minCount {
-				if !yield(minValue) {
+			// sustain y2 for y2Count data points
+			for range y2Count {
+				if !yield(y2) {
 					return
 				}
 			}
 
-			// rise
-			for step := 1; step <= riseSteps; step++ {
-				t := float64(step) / float64(riseSteps)
-				if !yield(minValue + (sustainValue-minValue)*t) {
+			// raise or fall from y2 to y1 at the y2y1StepCount
+			for step := 1; step <= y2y1StepCount; step++ {
+				t := float64(step) / float64(y2y1StepCount)
+				if !yield(y2 + (y1-y2)*t) {
 					return
 				}
 			}
