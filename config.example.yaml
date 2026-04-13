@@ -1,6 +1,13 @@
+prometheus:
+# Note: be sure to add the following flag when running the prometheus server: --web.enable-remote-write-receiver
+  # the remote write url to write the metrics to (required)
+  remote_write_url: "http://localhost:9090/"
+  insecure_skip_verify: true
 metrics:
 - name: "DCGM_FI_DEV_GPU_UTIL"
+  # the metric type (required)
   type: "gauge"
+  # define a *single* utilization pattern for the metric (required)
   utilizationPattern:
     # write a steady value
     steady:
@@ -33,7 +40,12 @@ metrics:
       y2Count: 3
       y1y2StepCount: 5
       y2y1StepCount: 0
+  # add labels to the metric (optional)
   labels:
   - node: edge-ffa238429efe572a777ef4a17e4fd9b7
-  interval: 5s
-  jitter: 2s # default: 0s
+  # write a value every given duration (required)
+  interval_duration: 5s
+  # add jitter to the interval (default: 0s)
+  jitter_duration: 2s
+  # generate metrics in the past for the given duration (default: 0s)
+  time_machine_duration: 5m

@@ -2,17 +2,25 @@ package config
 
 // Config holds application settings loaded from YAML (and env overrides).
 type Config struct {
-	Metrics []Metric `mapstructure:"metrics" yaml:"metrics"`
+	Prometheus PrometheusConfig `mapstructure:"prometheus" yaml:"prometheus"`
+	Metrics    []Metric         `mapstructure:"metrics" yaml:"metrics"`
+}
+
+// PrometheusConfig holds Prometheus configuration.
+type PrometheusConfig struct {
+	RemoteWriteURL     string `mapstructure:"remote_write_url" yaml:"remote_write_url"`
+	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify" yaml:"insecure_skip_verify"`
 }
 
 // Metric defines one synthetic metric to emit.
 type Metric struct {
-	Name               string              `mapstructure:"name" yaml:"name"`
-	Type               string              `mapstructure:"type" yaml:"type"`
-	UtilizationPattern UtilizationPattern  `mapstructure:"utilizationPattern" yaml:"utilizationPattern"`
-	Labels             []map[string]string `mapstructure:"labels" yaml:"labels"`
-	Interval           string              `mapstructure:"interval" yaml:"interval"`
-	Jitter             string              `mapstructure:"jitter" yaml:"jitter"`
+	Name                string              `mapstructure:"name" yaml:"name"`
+	Type                string              `mapstructure:"type" yaml:"type"`
+	UtilizationPattern  UtilizationPattern  `mapstructure:"utilizationPattern" yaml:"utilizationPattern"`
+	Labels              []map[string]string `mapstructure:"labels" yaml:"labels"`
+	IntervalDuration    string              `mapstructure:"interval_duration" yaml:"interval_duration"`
+	JitterDuration      string              `mapstructure:"jitter_duration" yaml:"jitter_duration"`
+	TimeMachineDuration string              `mapstructure:"time_machine_duration" yaml:"time_machine_duration"`
 }
 
 // UtilizationPattern defines the utilization pattern for a metric.

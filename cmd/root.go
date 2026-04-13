@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/spectrocloud-labs/prom-forge/internal/config"
-	"github.com/spectrocloud-labs/prom-forge/internal/exporter"
+	"github.com/spectrocloud-labs/prom-forge/internal/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -33,9 +33,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		c := Config()
-		fmt.Printf("config: %+v\n", c)
-
-		exporter.Export(c)
+		metrics.StartWriter(c)
 
 		return nil
 	},
