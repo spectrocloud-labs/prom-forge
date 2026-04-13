@@ -35,4 +35,5 @@ metrics:
       riseSteps: 1
   labels:
   - node: edge-ffa238429efe572a777ef4a17e4fd9b7
-  interval: 1s
+  interval: 5s
+  jitter: 2s # default: 0s

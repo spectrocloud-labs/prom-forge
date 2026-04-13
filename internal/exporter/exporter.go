@@ -7,6 +7,7 @@ import (
 	"iter"
 	"log"
 	"maps"
+	"math/rand/v2"
 	"net/http"
 	"os"
 	"os/signal"
@@ -26,6 +27,7 @@ type ExportTask struct {
 	Labels          map[string]string
 	Interval        time.Duration
 	UtilizationFunc iter.Seq[float64]
+	Jitter          time.Duration
 }
 
 type GaugeExportTask struct {
@@ -36,7 +38,9 @@ type GaugeExportTask struct {
 func (task *GaugeExportTask) Export(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	ticker := time.NewTicker(task.Interval)
+	jitterDur := time.Duration(rand.IntN(int(task.Jitter.Seconds())+1)) * time.Second
+
+	ticker := time.NewTicker(task.Interval + jitterDur)
 	defer ticker.Stop() // always stop ticker to free resources
 
 	fmt.Printf("[%s] started\n", task.Name)
@@ -50,7 +54,7 @@ func (task *GaugeExportTask) Export(ctx context.Context, wg *sync.WaitGroup) {
 		case <-ctx.Done():
 			fmt.Printf("[%s] shutting down\n", task.Name)
 			return
-		case _ = <-ticker.C:
+		case <-ticker.C:
 			fmt.Printf("[%s] tick at %s\n", task.Name, time.Now().Format(time.TimeOnly))
 
 			// iterate next value from utilization function
@@ -58,6 +62,10 @@ func (task *GaugeExportTask) Export(ctx context.Context, wg *sync.WaitGroup) {
 				fmt.Printf("[%s] value: %f\n", task.Name, val)
 				task.Gauge.With(task.Labels).Set(val)
 			}
+
+			// add jitter to interval if configured
+			jitterDur := time.Duration(rand.IntN(int(task.Jitter.Seconds())+1)) * time.Second
+			ticker.Reset(task.Interval + jitterDur)
 		}
 	}
 }
@@ -66,9 +74,16 @@ func getGaugeExportTasks(reg prometheus.Registerer, metrics []config.Metric) map
 	taskMap := map[string]*GaugeExportTask{}
 	for _, m := range metrics {
 		// checks for valid configuration
-		duration, err := time.ParseDuration(m.Interval)
+		interval, err := time.ParseDuration(m.Interval)
 		if err != nil {
 			panic(fmt.Sprintf("error parsing interval: %v", err))
+		}
+
+		jitter, err := time.ParseDuration(m.Jitter)
+		if err != nil && m.Jitter != "" {
+			panic(fmt.Sprintf("error parsing jitter: %v", err))
+		} else if m.Jitter == "" {
+			jitter = time.Duration(0)
 		}
 
 		var utilizationFunc iter.Seq[float64]
@@ -103,8 +118,9 @@ func getGaugeExportTasks(reg prometheus.Registerer, metrics []config.Metric) map
 				ExportTask: ExportTask{
 					Name:            m.Name,
 					Labels:          labels,
-					Interval:        duration,
+					Interval:        interval,
 					UtilizationFunc: utilizationFunc,
+					Jitter:          jitter,
 				},
 				Gauge: gauge,
 			}

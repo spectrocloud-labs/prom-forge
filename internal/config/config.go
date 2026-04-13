@@ -12,6 +12,7 @@ type Metric struct {
 	UtilizationPattern UtilizationPattern  `mapstructure:"utilizationPattern" yaml:"utilizationPattern"`
 	Labels             []map[string]string `mapstructure:"labels" yaml:"labels"`
 	Interval           string              `mapstructure:"interval" yaml:"interval"`
+	Jitter             string              `mapstructure:"jitter" yaml:"jitter"`
 }
 
 // UtilizationPattern defines the utilization pattern for a metric.
