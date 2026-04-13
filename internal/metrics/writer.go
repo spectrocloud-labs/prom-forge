@@ -24,6 +24,7 @@ type MetricWriterTask struct {
 	Name                string
 	Type                writev2.Metadata_MetricType
 	Labels              map[string]string
+	Tick                bool
 	IntervalDuration    time.Duration
 	JitterDuration      time.Duration
 	TimeMachineDuration time.Duration
@@ -129,7 +130,7 @@ func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 }
 
 // getTasksFromConfig gets the metric writer tasks from the config.
-func getTasksFromConfig(config config.Config) (map[string]*MetricWriterTask, error) {
+func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 	if config.Prometheus.RemoteWriteURL == "" {
 		return nil, fmt.Errorf("required field 'prometheus.remote_write_url' is not set")
 	}
@@ -137,7 +138,7 @@ func getTasksFromConfig(config config.Config) (map[string]*MetricWriterTask, err
 		return nil, fmt.Errorf("required field 'metrics' is not set")
 	}
 
-	taskMap := map[string]*MetricWriterTask{}
+	taskList := []*MetricWriterTask{}
 	for _, m := range config.Metrics {
 		// checks for valid configuration
 		interval, err := time.ParseDuration(m.IntervalDuration)
@@ -193,24 +194,30 @@ func getTasksFromConfig(config config.Config) (map[string]*MetricWriterTask, err
 			return nil, fmt.Errorf("error creating prometheus remote API client: %v", err)
 		}
 
+		tick := true
+		if m.Tick != nil {
+			tick = *m.Tick
+		}
+
 		switch m.Type {
 		case "gauge":
-			taskMap[m.Name] = &MetricWriterTask{
+			taskList = append(taskList, &MetricWriterTask{
 				Name:                m.Name,
 				Type:                writev2.Metadata_METRIC_TYPE_GAUGE,
 				Labels:              labels,
+				Tick:                tick,
 				IntervalDuration:    interval,
-				UtilizationFunc:     utilizationFunc,
 				JitterDuration:      jitter,
 				TimeMachineDuration: timeMachineDuration,
+				UtilizationFunc:     utilizationFunc,
 				client:              client,
-			}
+			})
 		default:
 			return nil, fmt.Errorf("unknown metric type: %s", m.Type)
 		}
 	}
 
-	return taskMap, nil
+	return taskList, nil
 }
 
 // StartWriter writes the metrics to Prometheus.
@@ -239,6 +246,9 @@ func StartWriter(config config.Config) {
 
 	// generate metrics in the present
 	for _, task := range metricWriterTasks {
+		if !task.Tick {
+			continue
+		}
 		wg.Add(1)
 		go task.Start(ctx, &wg)
 	}

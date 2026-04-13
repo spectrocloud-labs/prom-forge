@@ -18,6 +18,7 @@ type Metric struct {
 	Type                string              `mapstructure:"type" yaml:"type"`
 	UtilizationPattern  UtilizationPattern  `mapstructure:"utilizationPattern" yaml:"utilizationPattern"`
 	Labels              []map[string]string `mapstructure:"labels" yaml:"labels"`
+	Tick                *bool               `mapstructure:"tick" yaml:"tick"`
 	IntervalDuration    string              `mapstructure:"interval_duration" yaml:"interval_duration"`
 	JitterDuration      string              `mapstructure:"jitter_duration" yaml:"jitter_duration"`
 	TimeMachineDuration string              `mapstructure:"time_machine_duration" yaml:"time_machine_duration"`

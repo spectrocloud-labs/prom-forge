@@ -1,10 +1,10 @@
-prometheus:
 # Note: be sure to add the following flag when running the prometheus server: --web.enable-remote-write-receiver
+prometheus:
   # the remote write url to write the metrics to (required)
   remote_write_url: "http://localhost:9090/"
   insecure_skip_verify: true
 metrics:
-- name: "DCGM_FI_DEV_GPU_UTIL"
+- name: "gpu_utilization"
   # the metric type (required)
   type: "gauge"
   # define a *single* utilization pattern for the metric (required)
@@ -12,37 +12,39 @@ metrics:
     # write a steady value
     steady:
       value: 7.0
-    # write a random value
-    random:
-      max: 100.0
-      min: 1.0
-    # oscillate between 2 values rapidly
-    oscillating:
-      y1: 100.0
-      y1Count: 1
-      y2: 1.0
-      y2Count: 1
-      y1y2StepCount: 0
-      y2y1StepCount: 0
-    # oscillate between 2 values, sustained high then cliff drop then jump back up to sustained high
-    oscillating:
-      y1: 100.0
-      y1Count: 10
-      y2: 10.0
-      y2Count: 3
-      y1y2StepCount: 5
-      y2y1StepCount: 0
-    # oscillate between 2 values, sustained low then spike up then drop back to sustained low
-    oscillating:
-      y1: 10.0
-      y1Count: 10
-      y2: 100.0
-      y2Count: 3
-      y1y2StepCount: 5
-      y2y1StepCount: 0
+    # # write a random value
+    # random:
+    #   max: 100.0
+    #   min: 1.0
+    # # oscillate between 2 values rapidly
+    # oscillating:
+    #   y1: 100.0
+    #   y1Count: 1
+    #   y2: 1.0
+    #   y2Count: 1
+    #   y1y2StepCount: 0
+    #   y2y1StepCount: 0
+    # # oscillate between 2 values, sustained high then cliff drop then jump back up to sustained high
+    # oscillating:
+    #   y1: 100.0
+    #   y1Count: 10
+    #   y2: 10.0
+    #   y2Count: 3
+    #   y1y2StepCount: 5
+    #   y2y1StepCount: 0
+    # # oscillate between 2 values, sustained low then spike up then drop back to sustained low
+    # oscillating:
+    #   y1: 10.0
+    #   y1Count: 10
+    #   y2: 100.0
+    #   y2Count: 3
+    #   y1y2StepCount: 5
+    #   y2y1StepCount: 0
   # add labels to the metric (optional)
   labels:
   - node: edge-ffa238429efe572a777ef4a17e4fd9b7
+  # generate metrics in the present (default: true)
+  tick: true
   # write a value every given duration (required)
   interval_duration: 5s
   # add jitter to the interval (default: 0s)
