@@ -84,6 +84,7 @@ func (task *MetricWriterTask) StartTimeMachine(ctx context.Context, wg *sync.Wai
 				fmt.Printf("[%s] time machine error: %v\n", task.Name, err)
 			}
 		}
+		// #nosec G404
 		jitterDur := time.Duration(rand.IntN(int(task.JitterDuration.Seconds())+1)) * time.Second
 		currentTime += int64(task.IntervalDuration.Seconds() + jitterDur.Seconds())
 	}
@@ -95,6 +96,7 @@ func (task *MetricWriterTask) StartTimeMachine(ctx context.Context, wg *sync.Wai
 func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	// #nosec G404
 	jitterDur := time.Duration(rand.IntN(int(task.JitterDuration.Seconds())+1)) * time.Second
 
 	ticker := time.NewTicker(task.IntervalDuration + jitterDur)
@@ -123,6 +125,7 @@ func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 			}
 
 			// add jitter to interval if configured
+			// #nosec G404
 			jitterDur := time.Duration(rand.IntN(int(task.JitterDuration.Seconds())+1)) * time.Second
 			ticker.Reset(task.IntervalDuration + jitterDur)
 		}
@@ -187,7 +190,10 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 
 		client, err := remote.NewAPI(config.Prometheus.RemoteWriteURL, remote.WithAPIHTTPClient(&http.Client{
 			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: config.Prometheus.InsecureSkipVerify},
+				TLSClientConfig: &tls.Config{
+					// #nosec G402
+					InsecureSkipVerify: config.Prometheus.InsecureSkipVerify,
+				},
 			},
 		}))
 		if err != nil {
