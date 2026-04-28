@@ -1,0 +1,42 @@
+prometheus:
+  remote_write_url: "http://localhost:9090/"
+  insecure_skip_verify: true
+metrics:
+# first send historical data for past 1 hour
+- name: "gpu_utilization"
+  type: "gauge"
+  utilizationPattern:
+    oscillating:
+      y1: 30.0
+      y1Count: 3
+      y2: 10.0
+      y2Count: 3
+      y1y2StepCount: 2
+      y2y1StepCount: 2
+  labels:
+  - Hostname: "edge-d06019b377264272"
+  - UUID: "GPU-d259ea45"
+  - device: "nvidia0"
+  - gpu: "0"
+  - modelName: "NVIDIA RTX PRO 6000 Blackwell Server Edition"
+  - node: "edge-d06019b377264272"
+  tick: false
+  interval_duration: 5s
+  jitter_duration: 2s
+  time_machine_duration: 1h
+# then send metrics in the present
+- name: "gpu_utilization"
+  type: "gauge"
+  utilizationPattern:
+    random:
+      max: 100.0
+      min: 50.0
+  labels:
+  - Hostname: "edge-d06019b377264272"
+  - UUID: "GPU-d259ea45"
+  - device: "nvidia0"
+  - gpu: "0"
+  - modelName: "NVIDIA RTX PRO 6000 Blackwell Server Edition"
+  - node: "edge-d06019b377264272"
+  interval_duration: 2s
+  jitter_duration: 5s
