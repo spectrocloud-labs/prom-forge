@@ -15,7 +15,9 @@ go run . --config config.example.yaml
 ```
 
 ## The Past... and the Present
-You can generate data in the past that has a different utilization pattern than data in the present. This can be helpful for mocking CPU, GPU, etc. signal behaviors. Below is an example config of this.
+
+### Generating Data in the Past
+You can generate data in the past. Below is a configuration to generate a steady gpu utilization metric for the past 15m at an interval of 5s plus a random jitter between 0-2s.
 
 ```yaml
 prometheus:
@@ -25,19 +27,75 @@ metrics:
 - name: "gpu_utilization"
   type: "gauge"
   utilizationPattern:
-    oscillating:
-      y1: 30.0
-      y1Count: 3
-      y2: 10.0
-      y2Count: 3
-      y1y2StepCount: 2
-      y2y1StepCount: 2
+    steady:
+      value: 7.0
   labels:
   - node: edge-ffa238429efe572a777ef4a17e4fd9b7
   tick: false
   interval_duration: 5s
   jitter_duration: 2s
-  time_machine_duration: 5m
+  time_machine_duration: 15m
+```
+
+### Generating Data in the Present
+You can generate data in the present. Below is a configuration to generate a steady gpu utilization metric at an interval of 5s plus a random jitter between 0-2s.
+
+```yaml
+prometheus:
+  remote_write_url: "http://localhost:9090/"
+  insecure_skip_verify: true
+metrics:
+- name: "gpu_utilization"
+  type: "gauge"
+  utilizationPattern:
+    steady:
+      value: 7.0
+  labels:
+  - node: edge-ffa238429efe572a777ef4a17e4fd9b7
+  interval_duration: 5s
+  jitter_duration: 2s
+```
+
+### Generating Data in the Past... and the Present
+You can generate data in the past and the present.
+
+Below is a configuration to generate a steady gpu utilization metric for the past 15m and the present at an interval of 5s plus a random jitter between 0-2s.
+
+```yaml
+prometheus:
+  remote_write_url: "http://localhost:9090/"
+  insecure_skip_verify: true
+metrics:
+- name: "gpu_utilization"
+  type: "gauge"
+  utilizationPattern:
+    steady:
+      value: 7.0
+  labels:
+  - node: edge-ffa238429efe572a777ef4a17e4fd9b7
+  interval_duration: 5s
+  jitter_duration: 2s
+  time_machine_duration: 15m
+```
+
+Note, you can also generate data in the past that has a different utilization pattern than data in the present. This can be helpful for mocking CPU, GPU, etc. signal behaviors. Below is a configuration to generate a steady gpu utilization metric for the past 15m then generate a random gpu utilization metric for the present at an interval of 5s plus a random jitter between 0-2s.
+
+```yaml
+prometheus:
+  remote_write_url: "http://localhost:9090/"
+  insecure_skip_verify: true
+metrics:
+- name: "gpu_utilization"
+  type: "gauge"
+  utilizationPattern:
+    steady:
+      value: 7.0
+  labels:
+  - node: edge-ffa238429efe572a777ef4a17e4fd9b7
+  tick: false
+  interval_duration: 5s
+  jitter_duration: 2s
+  time_machine_duration: 15m
 - name: "gpu_utilization"
   type: "gauge"
   utilizationPattern:
