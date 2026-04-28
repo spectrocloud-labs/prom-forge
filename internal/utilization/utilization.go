@@ -22,6 +22,7 @@ func SteadyUtilization(args config.SteadyUtilizationPattern) iter.Seq[float64] {
 func RandomUtilization(args config.RandomUtilizationPattern) iter.Seq[float64] {
 	return func(yield func(float64) bool) {
 		for {
+			// #nosec G404
 			if !yield(float64(rand.IntN(int(args.Max-args.Min+1)) + int(args.Min))) {
 				return
 			}
