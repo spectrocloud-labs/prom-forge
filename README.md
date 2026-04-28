@@ -131,23 +131,7 @@ metrics:
     random:
       max: float64
       min: float64
-    # oscillate between 2 values rapidly
-    oscillating:
-      y1: float64
-      y1Count: int
-      y2: float64
-      y2Count: int
-      y1y2StepCount: int
-      y2y1StepCount: int
-    # oscillate between 2 values, sustained high then cliff drop then jump back up to sustained high
-    oscillating:
-      y1: float64
-      y1Count: int
-      y2: float64
-      y2Count: int
-      y1y2StepCount: int
-      y2y1StepCount: int
-    # oscillate between 2 values, sustained low then spike up then drop back to sustained low
+    # oscillate between 2 values
     oscillating:
       y1: float64
       y1Count: int
