@@ -49,7 +49,7 @@ func (task *MetricWriterTask) write(ctx context.Context, metricValue float64, ti
 			{Value: metricValue, Timestamp: tsMs},
 		},
 		Metadata: &writev2.Metadata{
-			Type: writev2.Metadata_METRIC_TYPE_GAUGE,
+			Type: task.Type,
 		},
 	}
 
