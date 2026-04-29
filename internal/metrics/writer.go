@@ -3,6 +3,7 @@ package metrics
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"iter"
 	"maps"
@@ -139,10 +140,6 @@ func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 	taskList := []*MetricWriterTask{}
 	for _, m := range config.Metrics {
-		intervalDuration, _ := time.ParseDuration(m.IntervalDuration)
-		jitterDuration, _ := time.ParseDuration(m.JitterDuration)
-		timeMachineDuration, _ := time.ParseDuration(m.TimeMachineDuration)
-
 		var utilizationFunc iter.Seq[float64]
 		switch {
 		case m.UtilizationPattern.Steady != nil:
@@ -156,12 +153,31 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 		labels := map[string]string{}
 		maps.Copy(labels, m.Labels)
 
+		tlsConfig := &tls.Config{
+			// #nosec G402
+			InsecureSkipVerify: config.Prometheus.InsecureSkipVerify,
+		}
+
+		// #nosec G402
+		if config.Prometheus.InsecureSkipVerify == true {
+			if _, err := fmt.Fprintf(os.Stderr, "warning: insecure skip verify is enabled\n"); err != nil {
+				return nil, fmt.Errorf("error writing to stderr: %v", err)
+			}
+		}
+
+		if config.Prometheus.CaFile != "" {
+			caCert, err := os.ReadFile(config.Prometheus.CaFile)
+			if err != nil {
+				return nil, fmt.Errorf("error reading ca file %s for metric %s", config.Prometheus.CaFile, m.Name)
+			}
+			caCertPool := x509.NewCertPool()
+			caCertPool.AppendCertsFromPEM(caCert)
+			tlsConfig.RootCAs = caCertPool
+		}
+
 		client, err := remote.NewAPI(config.Prometheus.RemoteWriteURL, remote.WithAPIHTTPClient(&http.Client{
 			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					// #nosec G402
-					InsecureSkipVerify: config.Prometheus.InsecureSkipVerify,
-				},
+				TLSClientConfig: tlsConfig,
 			},
 		}))
 		if err != nil {
@@ -173,9 +189,9 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 			Type:                writev2.Metadata_METRIC_TYPE_GAUGE,
 			Labels:              labels,
 			Tick:                *m.Tick,
-			IntervalDuration:    intervalDuration,
-			JitterDuration:      jitterDuration,
-			TimeMachineDuration: timeMachineDuration,
+			IntervalDuration:    m.IntervalDuration,
+			JitterDuration:      m.JitterDuration,
+			TimeMachineDuration: m.TimeMachineDuration,
 			UtilizationFunc:     utilizationFunc,
 			client:              client,
 		})
