@@ -33,7 +33,7 @@ type MetricWriterTask struct {
 }
 
 // write writes a metric to Prometheus.
-func (task *MetricWriterTask) write(ctx context.Context, metricValue float64, timestamp int64) error {
+func (task *MetricWriterTask) write(ctx context.Context, metricValue float64, timestamp time.Time) error {
 	sym := writev2.NewSymbolTable()
 	labelsRefs := []string{
 		"__name__", task.Name,
@@ -42,7 +42,7 @@ func (task *MetricWriterTask) write(ctx context.Context, metricValue float64, ti
 		labelsRefs = append(labelsRefs, k, v)
 	}
 
-	tsMs := (time.Duration(timestamp) * time.Second).Milliseconds()
+	tsMs := timestamp.UnixMilli()
 	ts := &writev2.TimeSeries{
 		LabelsRefs: sym.SymbolizeLabels(labelsRefs, nil),
 		Samples: []*writev2.Sample{
@@ -63,7 +63,7 @@ func (task *MetricWriterTask) write(ctx context.Context, metricValue float64, ti
 	if err != nil {
 		return fmt.Errorf("remote_write v2 failed: %v", err)
 	}
-	fmt.Printf("[%s] remote_write v2 ok (value=%f, timestamp=%s)\n", task.Name, metricValue, time.UnixMilli(tsMs).Format(time.TimeOnly))
+	fmt.Printf("[%s] remote_write v2 ok (value=%f, timestamp=%s)\n", task.Name, metricValue, timestamp.Format(time.TimeOnly))
 	return nil
 }
 
@@ -75,9 +75,10 @@ func (task *MetricWriterTask) StartTimeMachine(ctx context.Context, wg *sync.Wai
 	defer stop()
 
 	fmt.Printf("[%s] starting time machine for the last %s\n", task.Name, task.TimeMachineDuration)
-	pastTime := time.Now().Add(-task.TimeMachineDuration).Unix()
+	pastTime := time.Now().Add(-task.TimeMachineDuration)
+	presentTime := time.Now()
 	currentTime := pastTime
-	for currentTime < time.Now().Unix() {
+	for currentTime.Equal(presentTime) || currentTime.After(presentTime) {
 		if val, ok := next(); ok {
 			err := task.write(ctx, val, currentTime)
 			if err != nil {
@@ -85,8 +86,9 @@ func (task *MetricWriterTask) StartTimeMachine(ctx context.Context, wg *sync.Wai
 			}
 		}
 		// #nosec G404
-		jitterDur := time.Duration(rand.IntN(int(task.JitterDuration.Seconds())+1)) * time.Second
-		currentTime += int64(task.IntervalDuration.Seconds() + jitterDur.Seconds())
+		jitterDur := time.Duration(rand.Int64N(int64(task.JitterDuration.Nanoseconds()) + 1))
+		intervalDur := task.IntervalDuration + jitterDur
+		currentTime = currentTime.Add(intervalDur)
 	}
 
 	fmt.Printf("[%s] time machine completed\n", task.Name)
@@ -97,7 +99,7 @@ func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// #nosec G404
-	jitterDur := time.Duration(rand.IntN(int(task.JitterDuration.Seconds())+1)) * time.Second
+	jitterDur := time.Duration(rand.Int64N(int64(task.JitterDuration.Nanoseconds()) + 1))
 
 	ticker := time.NewTicker(task.IntervalDuration + jitterDur)
 	defer ticker.Stop() // always stop ticker to free resources
@@ -114,11 +116,12 @@ func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 			fmt.Printf("[%s] shutting down ticker\n", task.Name)
 			return
 		case <-ticker.C:
-			fmt.Printf("[%s] tick at %s\n", task.Name, time.Now().Format(time.TimeOnly))
+			now := time.Now()
+			fmt.Printf("[%s] tick at %s\n", task.Name, now.Format(time.TimeOnly))
 
 			// iterate next value from utilization function
 			if val, ok := next(); ok {
-				err := task.write(ctx, val, time.Now().Unix())
+				err := task.write(ctx, val, now)
 				if err != nil {
 					fmt.Printf("[%s] tick error: %v\n", task.Name, err)
 				}
@@ -126,7 +129,7 @@ func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 
 			// add jitter to interval if configured
 			// #nosec G404
-			jitterDur := time.Duration(rand.IntN(int(task.JitterDuration.Seconds())+1)) * time.Second
+			jitterDur := time.Duration(rand.Int64N(int64(task.JitterDuration.Nanoseconds()) + 1))
 			ticker.Reset(task.IntervalDuration + jitterDur)
 		}
 	}
@@ -227,7 +230,7 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 }
 
 // StartWriter writes the metrics to Prometheus.
-func StartWriter(config config.Config) {
+func StartWriter(config config.Config) error {
 	// create signal handler for graceful shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -238,7 +241,7 @@ func StartWriter(config config.Config) {
 	// create map of metric writer tasks
 	metricWriterTasks, err := getTasksFromConfig(config)
 	if err != nil {
-		panic(fmt.Sprintf("error getting metric writer tasks: %v", err))
+		return fmt.Errorf("error getting metric writer tasks: %v", err)
 	}
 
 	// run time machine to generate metrics in the past
@@ -264,4 +267,5 @@ func StartWriter(config config.Config) {
 
 	// exit
 	fmt.Println("exiting")
+	return nil
 }
