@@ -16,7 +16,7 @@ type prometheusConfig struct {
 type metric struct {
 	Name                string              `mapstructure:"name" yaml:"name"`
 	Type                string              `mapstructure:"type" yaml:"type"`
-	UtilizationPattern  utilizationPattern  `mapstructure:"utilizationPattern" yaml:"utilizationPattern"`
+	UtilizationPattern  utilizationPattern  `mapstructure:"utilization_pattern" yaml:"utilization_pattern"`
 	Labels              []map[string]string `mapstructure:"labels" yaml:"labels"`
 	Tick                *bool               `mapstructure:"tick" yaml:"tick"`
 	IntervalDuration    string              `mapstructure:"interval_duration" yaml:"interval_duration"`
@@ -45,9 +45,9 @@ type RandomUtilizationPattern struct {
 // OscillatingUtilizationPattern defines the oscillating utilization pattern.
 type OscillatingUtilizationPattern struct {
 	Y1            float64 `mapstructure:"y1" yaml:"y1"`
-	Y1Count       int     `mapstructure:"y1Count" yaml:"y1Count"`
+	Y1Count       int     `mapstructure:"y1_count" yaml:"y1_count"`
 	Y2            float64 `mapstructure:"y2" yaml:"y2"`
-	Y2Count       int     `mapstructure:"y2Count" yaml:"y2Count"`
-	Y1Y2StepCount int     `mapstructure:"y1y2StepCount" yaml:"y1y2StepCount"`
-	Y2Y1StepCount int     `mapstructure:"y2y1StepCount" yaml:"y2y1StepCount"`
+	Y2Count       int     `mapstructure:"y2_count" yaml:"y2_count"`
+	Y1Y2StepCount int     `mapstructure:"y1y2_step_count" yaml:"y1y2_step_count"`
+	Y2Y1StepCount int     `mapstructure:"y2y1_step_count" yaml:"y2y1_step_count"`
 }

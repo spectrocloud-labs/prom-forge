@@ -10,7 +10,7 @@ metrics:
   # the metric type (required)
   type: "gauge"
   # utilization pattern for metric (required)
-  utilizationPattern:
+  utilization_pattern:
     # write a steady value
     steady:
       value: 7.0
@@ -21,27 +21,27 @@ metrics:
     # # oscillate between 2 values rapidly
     # oscillating:
     #   y1: 100.0
-    #   y1Count: 1
+    #   y1_count: 1
     #   y2: 1.0
-    #   y2Count: 1
-    #   y1y2StepCount: 0
-    #   y2y1StepCount: 0
+    #   y2_count: 1
+    #   y1y2_step_count: 0
+    #   y2y1_step_count: 0
     # # oscillate between 2 values, sustained high then cliff drop then jump back up to sustained high
     # oscillating:
     #   y1: 100.0
-    #   y1Count: 10
+    #   y1_count: 10
     #   y2: 10.0
-    #   y2Count: 3
-    #   y1y2StepCount: 5
-    #   y2y1StepCount: 0
+    #   y2_count: 3
+    #   y1y2_step_count: 5
+    #   y2y1_step_count: 0
     # # oscillate between 2 values, sustained low then spike up then drop back to sustained low
     # oscillating:
     #   y1: 10.0
-    #   y1Count: 10
+    #   y1_count: 10
     #   y2: 100.0
-    #   y2Count: 3
-    #   y1y2StepCount: 5
-    #   y2y1StepCount: 0
+    #   y2_count: 3
+    #   y1y2_step_count: 5
+    #   y2y1_step_count: 0
   # labels for metric (optional)
   labels:
   - node: edge-ffa238429efe572a777ef4a17e4fd9b7
