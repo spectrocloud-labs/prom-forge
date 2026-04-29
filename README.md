@@ -7,9 +7,9 @@ Config-driven synthetic metrics generator for Prometheus using remote_write
 ./prometheus --config.file prometheus.yml --web.enable-remote-write-receiver
 ```
 
-2. Edit the example config `config.example.yaml` to your liking.
+1. Edit the example config `config.example.yaml` to your liking.
 
-2. Run cli.
+1. Run cli.
 ```sh
 go run . --config config.example.yaml
 ```
