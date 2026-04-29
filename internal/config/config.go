@@ -84,15 +84,14 @@ func Validate(config Config) error {
 		}
 
 		utilPatternsSet := 0
-		switch {
-		case m.UtilizationPattern.Steady != nil:
+		if m.UtilizationPattern.Steady != nil {
 			utilPatternsSet++
-			fallthrough
-		case m.UtilizationPattern.Oscillating != nil:
+		}
+		if m.UtilizationPattern.Oscillating != nil {
 			utilPatternsSet++
-			fallthrough
-		case m.UtilizationPattern.Random != nil:
-			if m.UtilizationPattern.Random.Max > m.UtilizationPattern.Random.Min {
+		}
+		if m.UtilizationPattern.Random != nil {
+			if m.UtilizationPattern.Random.Max <= m.UtilizationPattern.Random.Min {
 				return fmt.Errorf("utilization_pattern.random required field 'max' must be greater than required field 'min' for metric %s", m.Name)
 			}
 			utilPatternsSet++
