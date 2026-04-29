@@ -26,7 +26,7 @@ prometheus:
 metrics:
 - name: "gpu_utilization"
   type: "gauge"
-  utilizationPattern:
+  utilization_pattern:
     steady:
       value: 7.0
   labels:
@@ -47,7 +47,7 @@ prometheus:
 metrics:
 - name: "gpu_utilization"
   type: "gauge"
-  utilizationPattern:
+  utilization_pattern:
     steady:
       value: 7.0
   labels:
@@ -68,7 +68,7 @@ prometheus:
 metrics:
 - name: "gpu_utilization"
   type: "gauge"
-  utilizationPattern:
+  utilization_pattern:
     steady:
       value: 7.0
   labels:
@@ -87,7 +87,7 @@ prometheus:
 metrics:
 - name: "gpu_utilization"
   type: "gauge"
-  utilizationPattern:
+  utilization_pattern:
     steady:
       value: 7.0
   labels:
@@ -98,7 +98,7 @@ metrics:
   time_machine_duration: 15m
 - name: "gpu_utilization"
   type: "gauge"
-  utilizationPattern:
+  utilization_pattern:
     random:
       max: 100.0
       min: 50.0
@@ -123,7 +123,7 @@ metrics:
   # the metric type (required)
   type: string
   # utilization pattern for metric (required)
-  utilizationPattern:
+  utilization_pattern:
     # write a steady value
     steady:
       value: float64
@@ -134,11 +134,11 @@ metrics:
     # oscillate between 2 values
     oscillating:
       y1: float64
-      y1Count: int
+      y1_count: int
       y2: float64
-      y2Count: int
-      y1y2StepCount: int
-      y2y1StepCount: int
+      y2_count: int
+      y1y2_step_count: int
+      y2y1_step_count: int
   # labels for metric (optional)
   labels:
   - string: string
