@@ -23,7 +23,7 @@ func RandomUtilization(args config.RandomUtilizationPattern) iter.Seq[float64] {
 	return func(yield func(float64) bool) {
 		for {
 			// #nosec G404
-			if !yield(float64(rand.IntN(int(args.Max-args.Min+1)) + int(args.Min))) {
+			if !yield(args.Min + rand.Float64()*(args.Max-args.Min)) {
 				return
 			}
 		}
