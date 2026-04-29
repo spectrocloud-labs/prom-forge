@@ -27,8 +27,7 @@ var rootCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c := Config()
-		metrics.StartWriter(c)
+		metrics.StartWriter(cfg)
 
 		return nil
 	},
@@ -66,9 +65,4 @@ func initConfig() {
 			_, _ = fmt.Fprintf(os.Stderr, "read config: %v\n", err)
 		}
 	}
-}
-
-// Config returns the loaded configuration (after PersistentPreRun).
-func Config() config.Config {
-	return cfg
 }
