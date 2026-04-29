@@ -78,7 +78,7 @@ func (task *MetricWriterTask) StartTimeMachine(ctx context.Context, wg *sync.Wai
 	pastTime := time.Now().Add(-task.TimeMachineDuration)
 	presentTime := time.Now()
 	currentTime := pastTime
-	for currentTime.Equal(presentTime) || currentTime.After(presentTime) {
+	for currentTime.Before(presentTime) {
 		if val, ok := next(); ok {
 			err := task.write(ctx, val, currentTime)
 			if err != nil {
