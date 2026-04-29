@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -14,6 +15,7 @@ type Config struct {
 // PrometheusConfig holds Prometheus configuration.
 type prometheusConfig struct {
 	RemoteWriteURL     string `mapstructure:"remote_write_url" yaml:"remote_write_url"`
+	CaFile             string `mapstructure:"ca_file" yaml:"ca_file"`
 	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify" yaml:"insecure_skip_verify"`
 }
 
@@ -24,9 +26,9 @@ type metric struct {
 	UtilizationPattern  utilizationPattern `mapstructure:"utilization_pattern" yaml:"utilization_pattern"`
 	Labels              map[string]string  `mapstructure:"labels" yaml:"labels"`
 	Tick                *bool              `mapstructure:"tick" yaml:"tick"`
-	IntervalDuration    string             `mapstructure:"interval_duration" yaml:"interval_duration"`
-	JitterDuration      string             `mapstructure:"jitter_duration" yaml:"jitter_duration"`
-	TimeMachineDuration string             `mapstructure:"time_machine_duration" yaml:"time_machine_duration"`
+	IntervalDuration    time.Duration      `mapstructure:"interval_duration" yaml:"interval_duration"`
+	JitterDuration      time.Duration      `mapstructure:"jitter_duration" yaml:"jitter_duration"`
+	TimeMachineDuration time.Duration      `mapstructure:"time_machine_duration" yaml:"time_machine_duration"`
 }
 
 // UtilizationPattern defines the utilization pattern for a metric.
@@ -66,23 +68,14 @@ func Validate(config Config) error {
 		return fmt.Errorf("required field 'metrics' is not set")
 	}
 
+	if config.Prometheus.CaFile != "" {
+		if _, err := os.ReadFile(config.Prometheus.CaFile); err != nil {
+			return fmt.Errorf("field 'prometheus.ca_file' is set but file was not readable at path %s", config.Prometheus.CaFile)
+		}
+	}
+
 	for _, cfgMetric := range config.Metrics {
 		m := &cfgMetric
-		_, err := time.ParseDuration(m.IntervalDuration)
-		if err != nil {
-			return fmt.Errorf("error parsing required field 'interval_duration': %v", err)
-		}
-
-		_, err = time.ParseDuration(m.JitterDuration)
-		if err != nil {
-			return fmt.Errorf("error parsing optional field 'jitter_duration': %v", err)
-		}
-
-		_, err = time.ParseDuration(m.TimeMachineDuration)
-		if err != nil {
-			return fmt.Errorf("error parsing optional field 'time_machine_duration': %v", err)
-		}
-
 		utilPatternsSet := 0
 		if m.UtilizationPattern.Steady != nil {
 			utilPatternsSet++
@@ -116,12 +109,6 @@ func Validate(config Config) error {
 func Default(config *Config) {
 	for i := range config.Metrics {
 		cfgMetric := &config.Metrics[i]
-		if cfgMetric.JitterDuration == "" {
-			cfgMetric.JitterDuration = time.Duration(0).String()
-		}
-		if cfgMetric.TimeMachineDuration == "" {
-			cfgMetric.TimeMachineDuration = time.Duration(0).String()
-		}
 		var tick bool = true
 		if cfgMetric.Tick == nil {
 			cfgMetric.Tick = &tick
