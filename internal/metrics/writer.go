@@ -58,7 +58,6 @@ func (task *MetricWriterTask) write(ctx context.Context, metricValue float64, ti
 		Symbols:    sym.Symbols(),
 		Timeseries: []*writev2.TimeSeries{ts},
 	}
-	req.Symbols = sym.Symbols()
 
 	_, err := task.client.Write(ctx, remote.WriteV2MessageType, req)
 	if err != nil {
@@ -153,18 +152,20 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 			return nil, fmt.Errorf("error parsing required field 'interval_duration': %v", err)
 		}
 
+		if m.JitterDuration == "" {
+			m.JitterDuration = time.Duration(0).String()
+		}
 		jitter, err := time.ParseDuration(m.JitterDuration)
-		if err != nil && m.JitterDuration != "" {
+		if err != nil {
 			return nil, fmt.Errorf("error parsing optional field 'jitter_duration': %v", err)
-		} else if m.JitterDuration == "" {
-			jitter = time.Duration(0)
 		}
 
+		if m.TimeMachineDuration == "" {
+			m.TimeMachineDuration = time.Duration(0).String()
+		}
 		timeMachineDuration, err := time.ParseDuration(m.TimeMachineDuration)
-		if err != nil && m.TimeMachineDuration != "" {
+		if err != nil {
 			return nil, fmt.Errorf("error parsing optional field 'time_machine_duration': %v", err)
-		} else if m.TimeMachineDuration == "" {
-			timeMachineDuration = time.Duration(0)
 		}
 
 		var utilizationFunc iter.Seq[float64]
