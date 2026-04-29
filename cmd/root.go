@@ -27,7 +27,11 @@ var rootCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		metrics.StartWriter(cfg)
+
+		// start writer
+		if err := metrics.StartWriter(cfg); err != nil {
+			return fmt.Errorf("unable to start writer: %w", err)
+		}
 
 		return nil
 	},
