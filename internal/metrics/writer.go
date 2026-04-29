@@ -205,9 +205,6 @@ func StartWriter(config config.Config) error {
 		go task.StartTimeMachine(ctx, &wg)
 	}
 
-	// wait for time machine generation to complete
-	// wg.Wait()
-
 	// generate metrics in the present
 	for _, task := range metricWriterTasks {
 		if !task.Tick {
