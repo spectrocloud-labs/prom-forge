@@ -14,7 +14,6 @@ import (
 var (
 	cfgFile string
 	cfg     config.Config
-	help    bool
 )
 
 var rootCmd = &cobra.Command{
@@ -28,10 +27,6 @@ var rootCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if help {
-			return cmd.Help()
-		}
-
 		c := Config()
 		metrics.StartWriter(c)
 
@@ -47,7 +42,6 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default: $HOME/.prom-forge/config.yaml)")
-	rootCmd.PersistentFlags().BoolVar(&help, "help", false, "help")
 }
 
 func initConfig() {
