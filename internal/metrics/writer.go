@@ -63,7 +63,7 @@ func (task *MetricWriterTask) write(ctx context.Context, metricValue float64, ti
 	if err != nil {
 		return fmt.Errorf("remote_write v2 failed: %v", err)
 	}
-	fmt.Printf("[%s] remote_write v2 ok (value=%f, timestamp=%s)\n", task.Name, metricValue, timestamp.Format(time.TimeOnly))
+	fmt.Printf("[%s] remote_write v2 ok (value=%f, timestamp=%s)\n", task.Name, metricValue, timestamp.Format(time.DateTime))
 	return nil
 }
 
@@ -117,7 +117,7 @@ func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 			return
 		case <-ticker.C:
 			now := time.Now()
-			fmt.Printf("[%s] tick at %s\n", task.Name, now.Format(time.TimeOnly))
+			fmt.Printf("[%s] tick at %s\n", task.Name, now.Format(time.DateTime))
 
 			// iterate next value from utilization function
 			if val, ok := next(); ok {
@@ -206,7 +206,7 @@ func StartWriter(config config.Config) error {
 	}
 
 	// wait for time machine generation to complete
-	wg.Wait()
+	// wg.Wait()
 
 	// generate metrics in the present
 	for _, task := range metricWriterTasks {
