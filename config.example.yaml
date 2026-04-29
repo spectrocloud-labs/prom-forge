@@ -2,8 +2,10 @@
 prometheus:
   # the remote write url to write the metrics to (required)
   remote_write_url: "http://localhost:9090/"
-  # certificate check switch (optional)
+  # certificate check switch (optional, default: false)
   insecure_skip_verify: true
+  # certificate file to use for the remote write url (optional)
+  ca_file: "custom-ca.crt"
 metrics:
   # metric name (required)
 - name: "gpu_utilization"
