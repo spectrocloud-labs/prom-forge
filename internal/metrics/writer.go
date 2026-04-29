@@ -33,7 +33,7 @@ type MetricWriterTask struct {
 }
 
 // write writes a metric to Prometheus.
-func (task *MetricWriterTask) write(_ context.Context, metricValue float64, timestamp int64) error {
+func (task *MetricWriterTask) write(ctx context.Context, metricValue float64, timestamp int64) error {
 	sym := writev2.NewSymbolTable()
 	labelsRefs := []string{
 		"__name__", task.Name,
@@ -59,7 +59,7 @@ func (task *MetricWriterTask) write(_ context.Context, metricValue float64, time
 	}
 	req.Symbols = sym.Symbols()
 
-	_, err := task.client.Write(context.Background(), remote.WriteV2MessageType, req)
+	_, err := task.client.Write(ctx, remote.WriteV2MessageType, req)
 	if err != nil {
 		return fmt.Errorf("remote_write v2 failed: %v", err)
 	}
