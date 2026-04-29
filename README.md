@@ -30,7 +30,7 @@ metrics:
     steady:
       value: 7.0
   labels:
-  - node: edge-ffa238429efe572a777ef4a17e4fd9b7
+    node: edge-ffa238429efe572a777ef4a17e4fd9b7
   tick: false
   interval_duration: 5s
   jitter_duration: 2s
@@ -51,7 +51,7 @@ metrics:
     steady:
       value: 7.0
   labels:
-  - node: edge-ffa238429efe572a777ef4a17e4fd9b7
+    node: edge-ffa238429efe572a777ef4a17e4fd9b7
   interval_duration: 5s
   jitter_duration: 2s
 ```
@@ -72,7 +72,7 @@ metrics:
     steady:
       value: 7.0
   labels:
-  - node: edge-ffa238429efe572a777ef4a17e4fd9b7
+    node: edge-ffa238429efe572a777ef4a17e4fd9b7
   interval_duration: 5s
   jitter_duration: 2s
   time_machine_duration: 15m
@@ -91,7 +91,7 @@ metrics:
     steady:
       value: 7.0
   labels:
-  - node: edge-ffa238429efe572a777ef4a17e4fd9b7
+    node: edge-ffa238429efe572a777ef4a17e4fd9b7
   tick: false
   interval_duration: 5s
   jitter_duration: 2s
@@ -103,7 +103,7 @@ metrics:
       max: 100.0
       min: 50.0
   labels:
-  - node: edge-ffa238429efe572a777ef4a17e4fd9b7
+    node: edge-ffa238429efe572a777ef4a17e4fd9b7
   interval_duration: 2s
   jitter_duration: 5s
 ```
@@ -141,7 +141,7 @@ metrics:
       y2y1_step_count: int
   # labels for metric (optional)
   labels:
-  - string: string
+    string: string
   # generate metrics in the present (optional, default: true)
   tick: bool
   # writes metric at the given interval duration (required)

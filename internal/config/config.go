@@ -14,14 +14,14 @@ type prometheusConfig struct {
 
 // Metric defines one synthetic metric to emit.
 type metric struct {
-	Name                string              `mapstructure:"name" yaml:"name"`
-	Type                string              `mapstructure:"type" yaml:"type"`
-	UtilizationPattern  utilizationPattern  `mapstructure:"utilization_pattern" yaml:"utilization_pattern"`
-	Labels              []map[string]string `mapstructure:"labels" yaml:"labels"`
-	Tick                *bool               `mapstructure:"tick" yaml:"tick"`
-	IntervalDuration    string              `mapstructure:"interval_duration" yaml:"interval_duration"`
-	JitterDuration      string              `mapstructure:"jitter_duration" yaml:"jitter_duration"`
-	TimeMachineDuration string              `mapstructure:"time_machine_duration" yaml:"time_machine_duration"`
+	Name                string             `mapstructure:"name" yaml:"name"`
+	Type                string             `mapstructure:"type" yaml:"type"`
+	UtilizationPattern  utilizationPattern `mapstructure:"utilization_pattern" yaml:"utilization_pattern"`
+	Labels              map[string]string  `mapstructure:"labels" yaml:"labels"`
+	Tick                *bool              `mapstructure:"tick" yaml:"tick"`
+	IntervalDuration    string             `mapstructure:"interval_duration" yaml:"interval_duration"`
+	JitterDuration      string             `mapstructure:"jitter_duration" yaml:"jitter_duration"`
+	TimeMachineDuration string             `mapstructure:"time_machine_duration" yaml:"time_machine_duration"`
 }
 
 // UtilizationPattern defines the utilization pattern for a metric.
