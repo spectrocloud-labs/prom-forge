@@ -1,5 +1,10 @@
 package config
 
+import (
+	"fmt"
+	"time"
+)
+
 // Config holds application settings loaded from YAML (and env overrides).
 type Config struct {
 	Prometheus prometheusConfig `mapstructure:"prometheus" yaml:"prometheus"`
@@ -50,4 +55,77 @@ type OscillatingUtilizationPattern struct {
 	Y2Count       int     `mapstructure:"y2_count" yaml:"y2_count"`
 	Y1Y2StepCount int     `mapstructure:"y1y2_step_count" yaml:"y1y2_step_count"`
 	Y2Y1StepCount int     `mapstructure:"y2y1_step_count" yaml:"y2y1_step_count"`
+}
+
+// Validate validates the configuration.
+func Validate(config Config) error {
+	if config.Prometheus.RemoteWriteURL == "" {
+		return fmt.Errorf("required field 'prometheus.remote_write_url' is not set")
+	}
+	if len(config.Metrics) == 0 {
+		return fmt.Errorf("required field 'metrics' is not set")
+	}
+
+	for _, cfgMetric := range config.Metrics {
+		m := &cfgMetric
+		_, err := time.ParseDuration(m.IntervalDuration)
+		if err != nil {
+			return fmt.Errorf("error parsing required field 'interval_duration': %v", err)
+		}
+
+		_, err = time.ParseDuration(m.JitterDuration)
+		if err != nil {
+			return fmt.Errorf("error parsing optional field 'jitter_duration': %v", err)
+		}
+
+		_, err = time.ParseDuration(m.TimeMachineDuration)
+		if err != nil {
+			return fmt.Errorf("error parsing optional field 'time_machine_duration': %v", err)
+		}
+
+		utilPatternsSet := 0
+		switch {
+		case m.UtilizationPattern.Steady != nil:
+			utilPatternsSet++
+			fallthrough
+		case m.UtilizationPattern.Oscillating != nil:
+			utilPatternsSet++
+			fallthrough
+		case m.UtilizationPattern.Random != nil:
+			if m.UtilizationPattern.Random.Max > m.UtilizationPattern.Random.Min {
+				return fmt.Errorf("utilization_pattern.random required field 'max' must be greater than required field 'min' for metric %s", m.Name)
+			}
+			utilPatternsSet++
+		}
+
+		if utilPatternsSet != 1 {
+			return fmt.Errorf("please set exactly 1 utilization pattern for metric %s", m.Name)
+		}
+
+		switch m.Type {
+		case "gauge":
+			continue
+		default:
+			return fmt.Errorf("unknown metric type: %s", m.Type)
+		}
+	}
+
+	return nil
+}
+
+// Default sets the default values for the configuration.
+func Default(config *Config) {
+	for i := range config.Metrics {
+		cfgMetric := &config.Metrics[i]
+		if cfgMetric.JitterDuration == "" {
+			cfgMetric.JitterDuration = time.Duration(0).String()
+		}
+		if cfgMetric.TimeMachineDuration == "" {
+			cfgMetric.TimeMachineDuration = time.Duration(0).String()
+		}
+		var tick bool = true
+		if cfgMetric.Tick == nil {
+			cfgMetric.Tick = &tick
+		}
+	}
 }

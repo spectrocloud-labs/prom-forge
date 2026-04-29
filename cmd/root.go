@@ -24,6 +24,14 @@ var rootCmd = &cobra.Command{
 		if err := viper.Unmarshal(&cfg); err != nil {
 			return fmt.Errorf("parse config: %w", err)
 		}
+
+		// set default values
+		config.Default(&cfg)
+
+		// validate configuration
+		if err := config.Validate(cfg); err != nil {
+			return fmt.Errorf("validate config: %w", err)
+		}
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
