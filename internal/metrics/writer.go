@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"iter"
+	"maps"
 	"math/rand/v2"
 	"net/http"
 	"os"
@@ -185,11 +186,7 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 		}
 
 		labels := map[string]string{}
-		for _, l := range m.Labels {
-			for k, v := range l {
-				labels[k] = v
-			}
-		}
+		maps.Copy(labels, m.Labels)
 
 		client, err := remote.NewAPI(config.Prometheus.RemoteWriteURL, remote.WithAPIHTTPClient(&http.Client{
 			Transport: &http.Transport{
