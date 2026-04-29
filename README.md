@@ -136,6 +136,8 @@ prometheus:
   remote_write_url: string
   # certificate check switch (optional)
   insecure_skip_verify: bool
+  # certificate file to use for the remote write url (optional)
+  ca_file: string
 metrics:
   # metric name (required)
 - name: string
@@ -164,9 +166,9 @@ metrics:
   # generate metrics in the present (optional, default: true)
   tick: bool
   # writes metric at the given interval duration (required)
-  interval_duration: string
+  interval_duration: time.Duration
   # add jitter between 0 and the given value to the interval duration (default: 0s)
-  jitter_duration: string
+  jitter_duration: time.Duration
   # generates metrics in the past for the time machine duration (default: 0s)
-  time_machine_duration: string
+  time_machine_duration: time.Duration
 ```
