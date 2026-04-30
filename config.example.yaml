@@ -22,28 +22,34 @@ metrics:
     #   min: 1.0
     # # oscillate between 2 values rapidly
     # oscillating:
-    #   y1: 100.0
-    #   y1_count: 1
-    #   y2: 1.0
-    #   y2_count: 1
-    #   y1y2_step_count: 0
-    #   y2y1_step_count: 0
+    #   phase_a:
+    #     value: 100.0
+    #     hold_count: 1
+    #     ramp_steps: 0
+    #   phase_b:
+    #     value: 1.0
+    #     hold_count: 1
+    #     ramp_steps: 0
     # # oscillate between 2 values, sustained high then cliff drop then jump back up to sustained high
     # oscillating:
-    #   y1: 100.0
-    #   y1_count: 10
-    #   y2: 10.0
-    #   y2_count: 3
-    #   y1y2_step_count: 5
-    #   y2y1_step_count: 0
+    #   phase_a:
+    #     value: 100.0
+    #     hold_count: 10
+    #     ramp_steps: 5
+    #   phase_b:
+    #     value: 10.0
+    #     hold_count: 3
+    #     ramp_steps: 0
     # # oscillate between 2 values, sustained low then spike up then drop back to sustained low
     # oscillating:
-    #   y1: 10.0
-    #   y1_count: 10
-    #   y2: 100.0
-    #   y2_count: 3
-    #   y1y2_step_count: 5
-    #   y2y1_step_count: 0
+    #   phase_a:
+    #     value: 10.0
+    #     hold_count: 10
+    #     ramp_steps: 5
+    #   phase_b:
+    #     value: 100.0
+    #     hold_count: 3
+    #     ramp_steps: 0
   # labels for metric (optional)
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
