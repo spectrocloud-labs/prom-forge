@@ -49,14 +49,17 @@ type RandomUtilizationPattern struct {
 	Min float64 `mapstructure:"min" yaml:"min"`
 }
 
-// OscillatingUtilizationPattern defines the oscillating utilization pattern.
+// oscillationPhase defines one half of oscillation cycle.
+type oscillationPhase struct {
+	Value     float64 `mapstructure:"value" yaml:"value"`
+	HoldCount int     `mapstructure:"hold_count" yaml:"hold_count"`
+	RampSteps int     `mapstructure:"ramp_steps" yaml:"ramp_steps"`
+}
+
+// OscillatingUtilizationPattern oscillates between two phases.
 type OscillatingUtilizationPattern struct {
-	Y1            float64 `mapstructure:"y1" yaml:"y1"`
-	Y1Count       int     `mapstructure:"y1_count" yaml:"y1_count"`
-	Y2            float64 `mapstructure:"y2" yaml:"y2"`
-	Y2Count       int     `mapstructure:"y2_count" yaml:"y2_count"`
-	Y1Y2StepCount int     `mapstructure:"y1y2_step_count" yaml:"y1y2_step_count"`
-	Y2Y1StepCount int     `mapstructure:"y2y1_step_count" yaml:"y2y1_step_count"`
+	PhaseA oscillationPhase `mapstructure:"phase_a" yaml:"phase_a"`
+	PhaseB oscillationPhase `mapstructure:"phase_b" yaml:"phase_b"`
 }
 
 // Validate validates the configuration.

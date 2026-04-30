@@ -30,42 +30,44 @@ func RandomUtilization(args config.RandomUtilizationPattern) iter.Seq[float64] {
 	}
 }
 
-// OscillatingUtilization is an iterator that oscillates between 2 values given the oscillating utilization pattern arguments
+// OscillatingUtilization is an iterator that oscillates between 2 values given the oscillating utilization pattern arguments.
+// phaseA is 0-180 degrees or [0, π], phaseB is 180-360 degrees or [π, 2π].
 func OscillatingUtilization(args config.OscillatingUtilizationPattern) iter.Seq[float64] {
-	y1 := args.Y1
-	y1Count := args.Y1Count
-	y2 := args.Y2
-	y2Count := args.Y2Count
-	y1y2StepCount := args.Y1Y2StepCount
-	y2y1StepCount := args.Y2Y1StepCount
+	phaseAValue := args.PhaseA.Value
+	phaseACount := args.PhaseA.HoldCount
+	phaseARampSteps := args.PhaseA.RampSteps
+	phaseBValue := args.PhaseB.Value
+	phaseBCount := args.PhaseB.HoldCount
+	phaseBRampSteps := args.PhaseB.RampSteps
+
 	return func(yield func(float64) bool) {
 		for {
-			// sustain y1 for y1Count data points
-			for range y1Count {
-				if !yield(y1) {
+			// sustain phaseAValue for phaseACount data points
+			for range phaseACount {
+				if !yield(phaseAValue) {
 					return
 				}
 			}
 
-			// raise or fall from y1 to y2 at the y1y2StepCount
-			for step := 1; step <= y1y2StepCount; step++ {
-				t := float64(step) / float64(y1y2StepCount)
-				if !yield(y1 + (y2-y1)*t) {
+			// raise or fall from phaseAValue to phaseBValue at the phaseARampSteps
+			for step := 1; step <= phaseARampSteps; step++ {
+				t := float64(step) / float64(phaseARampSteps)
+				if !yield(phaseAValue + (phaseBValue-phaseAValue)*t) {
 					return
 				}
 			}
 
-			// sustain y2 for y2Count data points
-			for range y2Count {
-				if !yield(y2) {
+			// sustain phaseBValue for phaseBCount data points
+			for range phaseBCount {
+				if !yield(phaseBValue) {
 					return
 				}
 			}
 
-			// raise or fall from y2 to y1 at the y2y1StepCount
-			for step := 1; step <= y2y1StepCount; step++ {
-				t := float64(step) / float64(y2y1StepCount)
-				if !yield(y2 + (y1-y2)*t) {
+			// raise or fall from phaseBValue to phaseAValue at the phaseBRampSteps
+			for step := 1; step <= phaseBRampSteps; step++ {
+				t := float64(step) / float64(phaseBRampSteps)
+				if !yield(phaseBValue + (phaseAValue-phaseBValue)*t) {
 					return
 				}
 			}

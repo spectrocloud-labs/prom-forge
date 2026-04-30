@@ -154,12 +154,14 @@ metrics:
       min: float64
     # oscillate between 2 values
     oscillating:
-      y1: float64
-      y1_count: int
-      y2: float64
-      y2_count: int
-      y1y2_step_count: int
-      y2y1_step_count: int
+      phase_a:
+        value: float64
+        hold_count: int
+        ramp_steps: int
+      phase_b:
+        value: float64
+        hold_count: int
+        ramp_steps: int
   # labels for metric (optional)
   labels:
     string: string
