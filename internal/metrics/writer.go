@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/prometheus/client_golang/exp/api/remote"
 	writev2 "github.com/prometheus/client_golang/exp/api/remote/genproto/v2"
 	"github.com/spectrocloud-labs/prom-forge/internal/config"
@@ -64,7 +65,7 @@ func (task *MetricWriterTask) write(ctx context.Context, metricValue float64, ti
 	if err != nil {
 		return fmt.Errorf("remote_write v2 failed: %v", err)
 	}
-	fmt.Printf("[%s] remote_write v2 ok (value=%f, timestamp=%s)\n", task.Name, metricValue, timestamp.Format(time.DateTime))
+	log.Info("remote_write v2 ok", "metric", task.Name, "value", metricValue, "timestamp", timestamp.Format(time.DateTime))
 	return nil
 }
 
@@ -75,7 +76,7 @@ func (task *MetricWriterTask) StartTimeMachine(ctx context.Context, wg *sync.Wai
 	next, stop := iter.Pull(task.UtilizationFunc)
 	defer stop()
 
-	fmt.Printf("[%s] starting time machine for the last %s\n", task.Name, task.TimeMachineDuration)
+	log.Info("starting time machine", "metric", task.Name, "duration", task.TimeMachineDuration)
 	pastTime := time.Now().Add(-task.TimeMachineDuration)
 	presentTime := time.Now()
 	currentTime := pastTime
@@ -83,7 +84,7 @@ func (task *MetricWriterTask) StartTimeMachine(ctx context.Context, wg *sync.Wai
 		if val, ok := next(); ok {
 			err := task.write(ctx, val, currentTime)
 			if err != nil {
-				fmt.Printf("[%s] time machine error: %v\n", task.Name, err)
+				log.Error("time machine error", "metric", task.Name, "error", err)
 			}
 		}
 		// #nosec G404
@@ -92,7 +93,7 @@ func (task *MetricWriterTask) StartTimeMachine(ctx context.Context, wg *sync.Wai
 		currentTime = currentTime.Add(intervalDur)
 	}
 
-	fmt.Printf("[%s] time machine completed\n", task.Name)
+	log.Info("time machine completed", "metric", task.Name)
 }
 
 // Start starts the metric writer task.
@@ -105,7 +106,7 @@ func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 	ticker := time.NewTicker(task.IntervalDuration + jitterDur)
 	defer ticker.Stop() // always stop ticker to free resources
 
-	fmt.Printf("[%s] starting ticker\n", task.Name)
+	log.Info("starting ticker", "metric", task.Name)
 
 	// pull utilization function
 	next, stop := iter.Pull(task.UtilizationFunc)
@@ -114,17 +115,17 @@ func (task *MetricWriterTask) Start(ctx context.Context, wg *sync.WaitGroup) {
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Printf("[%s] shutting down ticker\n", task.Name)
+			log.Info("shutting down ticker", "metric", task.Name)
 			return
 		case <-ticker.C:
 			now := time.Now()
-			fmt.Printf("[%s] tick at %s\n", task.Name, now.Format(time.DateTime))
+			log.Info("tick", "metric", task.Name, "timestamp", now.Format(time.DateTime))
 
 			// iterate next value from utilization function
 			if val, ok := next(); ok {
 				err := task.write(ctx, val, now)
 				if err != nil {
-					fmt.Printf("[%s] tick error: %v\n", task.Name, err)
+					log.Error("tick error", "metric", task.Name, "error", err)
 				}
 			}
 
@@ -160,9 +161,7 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 
 		// #nosec G402
 		if config.Prometheus.InsecureSkipVerify == true {
-			if _, err := fmt.Fprintf(os.Stderr, "warning: insecure skip verify is enabled\n"); err != nil {
-				return nil, fmt.Errorf("error writing to stderr: %v", err)
-			}
+			log.Warn("insecure skip verify is enabled in your config")
 		}
 
 		if config.Prometheus.CaFile != "" {
@@ -234,6 +233,6 @@ func StartWriter(config config.Config) error {
 	wg.Wait()
 
 	// exit
-	fmt.Println("exiting")
+	log.Info("exiting")
 	return nil
 }

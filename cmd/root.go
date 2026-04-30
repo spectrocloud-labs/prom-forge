@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/charmbracelet/log"
+
 	"github.com/spectrocloud-labs/prom-forge/internal/config"
 	"github.com/spectrocloud-labs/prom-forge/internal/metrics"
 	"github.com/spf13/cobra"
@@ -12,14 +14,17 @@ import (
 )
 
 var (
-	cfgFile string
-	cfg     config.Config
+	cfgFile   string
+	cfg       config.Config
+	logFormat string
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "prom-forge",
-	Short: "Prometheus tooling CLI",
-	Long:  `prom-forge is a command-line tool with YAML-based configuration.`,
+	Use:           "prom-forge",
+	Short:         "Prometheus tooling CLI",
+	Long:          `prom-forge is a command-line tool with YAML-based configuration.`,
+	SilenceErrors: true,
+	SilenceUsage:  true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if err := viper.Unmarshal(&cfg); err != nil {
 			return fmt.Errorf("parse config: %w", err)
@@ -53,6 +58,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default: $HOME/.prom-forge/config.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&logFormat, "format", "f", "text", "format output (text, logfmt, json)")
 }
 
 func initConfig() {
@@ -61,8 +67,8 @@ func initConfig() {
 	} else {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "home directory: %v\n", err)
-			return
+			log.Error("home directory", "error", err)
+			os.Exit(1)
 		}
 		viper.AddConfigPath(filepath.Join(home, ".prom-forge"))
 		viper.SetConfigType("yaml")
@@ -74,7 +80,20 @@ func initConfig() {
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			_, _ = fmt.Fprintf(os.Stderr, "read config: %v\n", err)
+			log.Error("read config", "error", err)
+			os.Exit(1)
 		}
+	}
+
+	switch logFormat {
+	case "text":
+		log.SetFormatter(log.TextFormatter)
+	case "json":
+		log.SetFormatter(log.JSONFormatter)
+	case "logfmt":
+		log.SetFormatter(log.LogfmtFormatter)
+	default:
+		log.Error("invalid log format", "format", logFormat)
+		os.Exit(1)
 	}
 }
