@@ -92,8 +92,12 @@ func Validate(config Config) error {
 		}
 	}
 
-	for _, cfgMetric := range config.Metrics {
+	for i, cfgMetric := range config.Metrics {
 		m := &cfgMetric
+
+		if m.Name == "" {
+			return fmt.Errorf("required field 'metrics[%d].name' is not set", i)
+		}
 
 		if m.IntervalDuration <= 0 {
 			return fmt.Errorf("interval_duration must be greater than 0 for metric %s", m.Name)

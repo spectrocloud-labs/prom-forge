@@ -186,7 +186,7 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 		}
 
 		transport := &http.Transport{TLSClientConfig: tlsConfig}
-		httpClient := &http.Client{Transport: transport}
+		httpClient := &http.Client{Transport: transport, Timeout: time.Minute}
 
 		// add basic authentication roundtripper if configured
 		if config.Prometheus.BasicAuth != nil {
