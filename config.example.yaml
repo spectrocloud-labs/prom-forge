@@ -6,6 +6,10 @@ prometheus:
   insecure_skip_verify: true
   # certificate file to use for the remote write url (optional)
   ca_file: "custom-ca.crt"
+  # basic authentication configuration (optional)
+  basic_auth:
+    username: ""
+    password: ""
 metrics:
   # metric name (required)
 - name: "gpu_utilization"

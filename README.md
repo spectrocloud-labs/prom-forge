@@ -138,6 +138,10 @@ prometheus:
   insecure_skip_verify: bool
   # certificate file to use for the remote write url (optional)
   ca_file: string
+  # basic authentication configuration (optional)
+  basic_auth:
+    username: string
+    password: string
 metrics:
   # metric name (required)
 - name: string

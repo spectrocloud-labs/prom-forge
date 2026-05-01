@@ -18,6 +18,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/prometheus/client_golang/exp/api/remote"
 	writev2 "github.com/prometheus/client_golang/exp/api/remote/genproto/v2"
+	"github.com/spectrocloud-labs/prom-forge/internal/client"
 	"github.com/spectrocloud-labs/prom-forge/internal/config"
 	"github.com/spectrocloud-labs/prom-forge/internal/utilization"
 )
@@ -184,11 +185,21 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 			tlsConfig.RootCAs = caCertPool
 		}
 
-		client, err := remote.NewAPI(config.Prometheus.RemoteWriteURL, remote.WithAPIHTTPClient(&http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: tlsConfig,
-			},
-		}))
+		transport := &http.Transport{TLSClientConfig: tlsConfig}
+		httpClient := &http.Client{Transport: transport}
+
+		// add basic authentication roundtripper if configured
+		if config.Prometheus.BasicAuth != nil {
+			basicAuthRoundTripper := &client.BasicAuthRoundTripper{
+				Username: config.Prometheus.BasicAuth.Username,
+				Password: config.Prometheus.BasicAuth.Password,
+				Next:     transport,
+			}
+			httpClient.Transport = basicAuthRoundTripper
+		}
+
+		// create remote API client
+		client, err := remote.NewAPI(config.Prometheus.RemoteWriteURL, remote.WithAPIHTTPClient(httpClient))
 		if err != nil {
 			return nil, fmt.Errorf("error creating prometheus remote API client: %v", err)
 		}

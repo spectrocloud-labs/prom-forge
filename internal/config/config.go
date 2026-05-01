@@ -14,9 +14,16 @@ type Config struct {
 
 // PrometheusConfig holds Prometheus configuration.
 type prometheusConfig struct {
-	RemoteWriteURL     string `mapstructure:"remote_write_url" yaml:"remote_write_url"`
-	CaFile             string `mapstructure:"ca_file" yaml:"ca_file"`
-	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify" yaml:"insecure_skip_verify"`
+	RemoteWriteURL     string     `mapstructure:"remote_write_url" yaml:"remote_write_url"`
+	CaFile             string     `mapstructure:"ca_file" yaml:"ca_file"`
+	InsecureSkipVerify bool       `mapstructure:"insecure_skip_verify" yaml:"insecure_skip_verify"`
+	BasicAuth          *BasicAuth `mapstructure:"basic_auth" yaml:"basic_auth"`
+}
+
+// BasicAuth holds basic authentication configuration.
+type BasicAuth struct {
+	Username string `mapstructure:"username" yaml:"username"`
+	Password string `mapstructure:"password" yaml:"password"`
 }
 
 // Metric defines one synthetic metric to emit.
