@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+// OpaqueString is a string that is not meant to be logged.
+type OpaqueString string
+
+// String returns the string representation of the OpaqueString.
+func (s OpaqueString) String() string {
+	return "[REDACTED]"
+}
+
 // Config holds application settings loaded from YAML (and env overrides).
 type Config struct {
 	Prometheus prometheusConfig `mapstructure:"prometheus" yaml:"prometheus"`
@@ -22,8 +30,8 @@ type prometheusConfig struct {
 
 // BasicAuth holds basic authentication configuration.
 type BasicAuth struct {
-	Username string `mapstructure:"username" yaml:"username"`
-	Password string `mapstructure:"password" yaml:"password"`
+	Username string       `mapstructure:"username" yaml:"username"`
+	Password OpaqueString `mapstructure:"password" yaml:"password"`
 }
 
 // Metric defines one synthetic metric to emit.
