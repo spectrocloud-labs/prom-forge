@@ -79,12 +79,30 @@ func Validate(config Config) error {
 
 	for _, cfgMetric := range config.Metrics {
 		m := &cfgMetric
+
+		if m.IntervalDuration <= 0 {
+			return fmt.Errorf("interval_duration must be greater than 0 for metric %s", m.Name)
+		}
+		if m.JitterDuration < 0 {
+			return fmt.Errorf("jitter_duration must be >= 0 for metric %s", m.Name)
+		}
+		if m.TimeMachineDuration < 0 {
+			return fmt.Errorf("time_machine_duration must be >= 0 for metric %s", m.Name)
+		}
+
 		utilPatternsSet := 0
 		if m.UtilizationPattern.Steady != nil {
 			utilPatternsSet++
 		}
 		if m.UtilizationPattern.Oscillating != nil {
 			utilPatternsSet++
+			p := m.UtilizationPattern.Oscillating
+			if p.PhaseA.HoldCount < 0 || p.PhaseA.RampSteps < 0 || p.PhaseB.HoldCount < 0 || p.PhaseB.RampSteps < 0 {
+				return fmt.Errorf("oscillating hold_count and ramp_steps must be >= 0 for metric %s", m.Name)
+			}
+			if p.PhaseA.HoldCount+p.PhaseA.RampSteps+p.PhaseB.HoldCount+p.PhaseB.RampSteps == 0 {
+				return fmt.Errorf("oscillating pattern must emit at least one sample for metric %s", m.Name)
+			}
 		}
 		if m.UtilizationPattern.Random != nil {
 			if m.UtilizationPattern.Random.Max <= m.UtilizationPattern.Random.Min {

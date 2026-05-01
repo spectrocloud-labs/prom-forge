@@ -81,6 +81,13 @@ func (task *MetricWriterTask) StartTimeMachine(ctx context.Context, wg *sync.Wai
 	presentTime := time.Now()
 	currentTime := pastTime
 	for currentTime.Before(presentTime) {
+		select {
+		case <-ctx.Done():
+			log.Info("shutting down time machine", "metric", task.Name)
+			return
+		default:
+		}
+
 		if val, ok := next(); ok {
 			err := task.write(ctx, val, currentTime)
 			if err != nil {
@@ -170,7 +177,9 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 				return nil, fmt.Errorf("error reading ca file %s for metric %s", config.Prometheus.CaFile, m.Name)
 			}
 			caCertPool := x509.NewCertPool()
-			caCertPool.AppendCertsFromPEM(caCert)
+			if !caCertPool.AppendCertsFromPEM(caCert) {
+				return nil, fmt.Errorf("ca file %s for metric %s does not contain a valid PEM certificate", config.Prometheus.CaFile, m.Name)
+			}
 			tlsConfig.RootCAs = caCertPool
 		}
 

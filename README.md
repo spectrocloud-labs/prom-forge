@@ -142,7 +142,7 @@ metrics:
   # metric name (required)
 - name: string
   # the metric type (required)
-  type: string
+  type: "gauge"
   # utilization pattern for metric (required)
   utilization_pattern:
     # write a steady value
