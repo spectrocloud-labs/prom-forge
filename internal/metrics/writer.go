@@ -164,6 +164,7 @@ func getTasksFromConfig(config config.Config) ([]*MetricWriterTask, error) {
 		tlsConfig := &tls.Config{
 			// #nosec G402
 			InsecureSkipVerify: config.Prometheus.InsecureSkipVerify,
+			MinVersion:         tls.VersionTLS12,
 		}
 
 		// #nosec G402
