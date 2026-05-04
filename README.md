@@ -49,7 +49,8 @@ metrics:
   type: "gauge"
   utilization_pattern:
     steady:
-      value: 7.0
+      slope: 0.0
+      offset: 7.0
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
   tick: false
@@ -70,7 +71,8 @@ metrics:
   type: "gauge"
   utilization_pattern:
     steady:
-      value: 7.0
+      slope: 0.0
+      offset: 7.0
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
   interval_duration: 5s
@@ -91,7 +93,8 @@ metrics:
   type: "gauge"
   utilization_pattern:
     steady:
-      value: 7.0
+      slope: 0.0
+      offset: 7.0
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
   interval_duration: 5s
@@ -110,7 +113,8 @@ metrics:
   type: "gauge"
   utilization_pattern:
     steady:
-      value: 7.0
+      slope: 0.0
+      offset: 7.0
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
   tick: false
