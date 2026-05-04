@@ -3,13 +3,13 @@ package client
 import (
 	"net/http"
 
-	"github.com/spectrocloud-labs/prom-forge/internal/config"
+	"github.com/spectrocloud-labs/prom-forge/internal"
 )
 
 // BasicAuthRoundTripper is a roundtripper that adds basic authentication to a request.
 type BasicAuthRoundTripper struct {
 	Username string
-	Password config.OpaqueString
+	Password internal.OpaqueString
 	Next     http.RoundTripper
 }
 
