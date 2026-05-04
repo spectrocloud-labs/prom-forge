@@ -4,34 +4,36 @@ Config-driven synthetic metrics generator for Prometheus using remote_write
 ## Quick Start
 1. Create a prometheus config.
 
-```yaml
-global:
-  scrape_interval: 1s
+    ```yaml
+    global:
+      scrape_interval: 1s
 
-scrape_configs:
-  - job_name: "prometheus"
-    static_configs:
-      - targets: ["localhost:9090"]
-        labels:
-          app: "prometheus"
+    scrape_configs:
+      - job_name: "prometheus"
+        static_configs:
+          - targets: ["localhost:9090"]
+            labels:
+              app: "prometheus"
 
-# Note: out_of_order_time_window is required if using `time machine` to allow for concurrent metric writes in the past and present.
-storage:
-  tsdb:
-    out_of_order_time_window: 1d
-```
+    # Note: out_of_order_time_window is required if using `time machine` to allow for concurrent metric writes in the past and present.
+    storage:
+      tsdb:
+        out_of_order_time_window: 1d
+    ```
 
 1. Run prometheus with the remote_write receiver flag.
-```sh
-./prometheus --config.file prometheus.yml --web.enable-remote-write-receiver
-```
+
+    ```sh
+    ./prometheus --config.file prometheus.yml --web.enable-remote-write-receiver
+    ```
 
 1. Edit the example config `config.example.yaml` to your liking.
 
 1. Run cli.
-```sh
-go run . --config config.example.yaml
-```
+
+    ```sh
+    go run . --config config.example.yaml
+    ```
 
 ## Generating Data
 
