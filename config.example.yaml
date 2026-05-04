@@ -19,7 +19,8 @@ metrics:
   utilization_pattern:
     # write a steady value
     steady:
-      value: 7.0
+      slope: -0.5
+      offset: 0.0
     # # write a random value
     # random:
     #   max: 100.0
@@ -54,6 +55,40 @@ metrics:
     #     value: 100.0
     #     hold_count: 3
     #     ramp_steps: 0
+  # labels for metric (optional)
+  labels:
+    node: edge-ffa238429efe572a777ef4a17e4fd9b7
+  # generate metrics in the present (optional, default: true)
+  tick: true
+  # writes metric at the given interval duration (required)
+  interval_duration: 5s
+  # add jitter between 0 and the given value to the interval duration (default: 0s)
+  jitter_duration: 2s
+  # generates metrics in the past for the time machine duration (default: 0s)
+  time_machine_duration: 5m
+- name: "node_cpu_seconds_total"
+  # the metric type (required)
+  type: "counter"
+  # utilization pattern for metric (required)
+  utilization_pattern:
+    # write a steady value
+    steady:
+      slope: 0.5
+      offset: 0.0
+    # # write a random increasing value
+    # random:
+    #   max: 100.0
+    #   min: 1.0
+    # # oscillates a monotonic staircase: hold at A, ramp A→B, hold at B, then ramp B→B′ where B′ = B+(B−A)
+    # oscillating:
+    #   phase_a:
+    #     value: 10.0
+    #     hold_count: 5
+    #     ramp_steps: 3
+    #   phase_b:
+    #     value: 20.0
+    #     hold_count: 2
+    #     ramp_steps: 3
   # labels for metric (optional)
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7

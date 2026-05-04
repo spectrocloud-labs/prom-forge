@@ -145,13 +145,14 @@ prometheus:
 metrics:
   # metric name (required)
 - name: string
-  # the metric type (required)
-  type: "gauge"
+  # the metric type (required, "gauge" or "counter")
+  type: string
   # utilization pattern for metric (required)
   utilization_pattern:
     # write a steady value
     steady:
-      value: float64
+      slope: float64
+      offset: float64
     # write a random value
     random:
       max: float64
