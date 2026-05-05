@@ -44,6 +44,7 @@ func (r *Random) Next(t time.Time) float64 {
 		r.startTime = t
 	}
 	timeElasped := t.Sub(r.startTime).Seconds()
+	// #nosec G404
 	noise := rand.Float64()*(r.Max-r.Min) + r.Min
 	y := r.Slope*timeElasped + r.Offset + noise
 	return y
