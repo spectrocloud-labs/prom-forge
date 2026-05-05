@@ -161,6 +161,8 @@ metrics:
       offset: float64
     # write a random value
     random:
+      slope: float64
+      offset: float64
       max: float64
       min: float64
     # oscillate between 2 values
