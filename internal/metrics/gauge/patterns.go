@@ -32,21 +32,30 @@ func NewSteady(slope, offset float64) (Pattern, error) {
 	return &Steady{Slope: slope, Offset: offset}, nil
 }
 
-// Random: gauge jumps to a random value in [Min, Max] each tick.
-type Random struct{ Min, Max float64 }
+// Random: gauge outputs a value defined by the given linear function and adds random noise in the range [Min, Max) at each point.
+type Random struct {
+	Slope, Offset float64
+	Min, Max      float64
+	startTime     time.Time
+}
 
-func (r Random) Next(_ time.Time) float64 {
-	// #nosec G404
-	return r.Min + rand.Float64()*(r.Max-r.Min)
+func (r *Random) Next(t time.Time) float64 {
+	if r.startTime.IsZero() {
+		r.startTime = t
+	}
+	timeElasped := t.Sub(r.startTime).Seconds()
+	noise := rand.Float64()*(r.Max-r.Min) + r.Min
+	y := r.Slope*timeElasped + r.Offset + noise
+	return y
 }
 func (r Random) Name() string { return "random" }
 
 // NewRandom creates a new random pattern.
-func NewRandom(min, max float64) (Pattern, error) {
+func NewRandom(slope, offset, min, max float64) (Pattern, error) {
 	if min >= max {
 		return nil, fmt.Errorf("min must be less than max")
 	}
-	return &Random{Min: min, Max: max}, nil
+	return &Random{Slope: slope, Offset: offset, Min: min, Max: max}, nil
 }
 
 type oscPhase uint8

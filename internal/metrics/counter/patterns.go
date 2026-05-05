@@ -3,7 +3,7 @@ package counter
 
 import (
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"time"
 )
 
@@ -36,32 +36,44 @@ func NewSteady(slope, offset float64) (Pattern, error) {
 	return &Steady{Slope: slope, Offset: offset}, nil
 }
 
-// Random: counter jumps to a random value in [Min, Max] each iteration always increasing.
+// Random: counter increases as defined by the given linear function and adds random noise in the range [Min, Max) at each point.
 type Random struct {
-	Min, Max  float64
-	lastValue *float64
+	Slope, Offset float64
+	Min, Max      float64
+	startTime     time.Time
+	lastY         float64
+	started       bool
 }
 
-func (r *Random) Next(_ time.Time) float64 {
-	var value, min float64
-	min = r.Min
-	if r.lastValue != nil {
-		min = *r.lastValue
+func (r *Random) Next(t time.Time) float64 {
+	if r.startTime.IsZero() {
+		r.startTime = t
 	}
-	// #nosec G404
-	value = min + rand.Float64()*(r.Max-min)
-	r.lastValue = &value
-	return value
+	timeElasped := t.Sub(r.startTime).Seconds()
+	noise := rand.Float64()*(r.Max-r.Min) + r.Min
+	y := r.Slope*timeElasped + r.Offset + noise
+
+	// Force monotonic increase
+	if r.started && y <= r.lastY {
+		y = r.lastY + noise + 1e-9
+	}
+
+	r.lastY = y
+	r.started = true
+	return y
 }
 
 func (r Random) Name() string { return "random" }
 
 // NewRandom creates a new random pattern.
-func NewRandom(min, max float64) (Pattern, error) {
+func NewRandom(slope, offset, min, max float64) (Pattern, error) {
+	if slope < 0 {
+		return nil, fmt.Errorf("slope must be greater than or equal to 0 for a counter metric")
+	}
 	if min >= max {
 		return nil, fmt.Errorf("min must be less than max")
 	}
-	return &Random{Min: min, Max: max}, nil
+	return &Random{Slope: slope, Offset: offset, Min: min, Max: max}, nil
 }
 
 type oscPhase uint8
