@@ -78,10 +78,7 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		// wait for signal
-		<-ctx.Done()
-
-		// wait for goroutine tasks to cleanup
+		// wait for goroutine tasks to cleanup and return
 		wg.Wait()
 
 		// exit
