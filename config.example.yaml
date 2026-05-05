@@ -21,8 +21,10 @@ metrics:
     steady:
       slope: -0.5
       offset: 0.0
-    # # write a random value
+    # # write a random value as defined by the given linear function and adds random noise in the range [Min, Max] at each point.
     # random:
+    #   slope: 0.0
+    #   offset: 0.0
     #   max: 100.0
     #   min: 1.0
     # # oscillate between 2 values rapidly
@@ -75,9 +77,11 @@ metrics:
     steady:
       slope: 0.5
       offset: 0.0
-    # # write a random increasing value
+    # # write a value that increases as defined by the given linear function and adds random noise in the range [Min, Max] at each point.
     # random:
-    #   max: 100.0
+    #   slope: 1.0
+    #   offset: 0.0
+    #   max: 5.0
     #   min: 1.0
     # # oscillates a monotonic staircase: hold at A, ramp A→B, hold at B, then ramp B→B′ where B′ = B+(B−A)
     # oscillating:
