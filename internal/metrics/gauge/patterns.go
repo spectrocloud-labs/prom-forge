@@ -36,6 +36,7 @@ func NewSteady(slope, offset float64) (Pattern, error) {
 type Random struct{ Min, Max float64 }
 
 func (r Random) Next(_ time.Time) float64 {
+	// #nosec G404
 	return r.Min + rand.Float64()*(r.Max-r.Min)
 }
 func (r Random) Name() string { return "random" }

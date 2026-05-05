@@ -48,6 +48,7 @@ func (r *Random) Next(_ time.Time) float64 {
 	if r.lastValue != nil {
 		min = *r.lastValue
 	}
+	// #nosec G404
 	value = min + rand.Float64()*(r.Max-min)
 	r.lastValue = &value
 	return value
