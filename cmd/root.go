@@ -62,20 +62,16 @@ var rootCmd = &cobra.Command{
 		// create and run time machine and tick tasks for each metric
 		var wg sync.WaitGroup
 		for _, task := range tasks {
-			if task.TimeMachineDuration() > 0 {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				if task.TimeMachineDuration() > 0 {
 					task.StartTimeMachine(ctx)
-				}()
-			}
-			if task.Tick() {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
+				}
+				if task.Tick() {
 					task.Start(ctx)
-				}()
-			}
+				}
+			}()
 		}
 
 		// wait for goroutine tasks to cleanup and return

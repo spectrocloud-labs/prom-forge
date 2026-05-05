@@ -13,7 +13,7 @@ type Pattern interface {
 	Name() string
 }
 
-// Steady: counter holds a fixed value.
+// Steady: counter increases as defined by the given linear function.
 type Steady struct {
 	Slope, Offset float64
 	startTime     time.Time

@@ -50,7 +50,7 @@ func CreateTasksFromConfig(config Config, client *remote.API) ([]*task.Task, err
 				}
 			}
 
-			metric = gauge.New(m.Name, pattern, m.Labels)
+			metric = gauge.New(m.Name, pattern, labels)
 			t := task.New(metric, m.IntervalDuration, m.JitterDuration, m.TimeMachineDuration, *m.Tick, client)
 			taskList = append(taskList, t)
 		case "counter":
@@ -76,7 +76,7 @@ func CreateTasksFromConfig(config Config, client *remote.API) ([]*task.Task, err
 				}
 			}
 
-			metric := counter.New(m.Name, pattern, m.Labels)
+			metric := counter.New(m.Name, pattern, labels)
 			t := task.New(metric, m.IntervalDuration, m.JitterDuration, m.TimeMachineDuration, *m.Tick, client)
 			taskList = append(taskList, t)
 		}

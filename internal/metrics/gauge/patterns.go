@@ -12,7 +12,7 @@ type Pattern interface {
 	Name() string
 }
 
-// Steady: gauge holds a fixed value.
+// Steady: gauge increases as defined by the given linear function.
 type Steady struct {
 	Slope, Offset float64
 	startTime     time.Time
