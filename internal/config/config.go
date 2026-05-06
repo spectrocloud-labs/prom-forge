@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"time"
 
@@ -78,6 +79,16 @@ type OscillatingUtilizationPattern struct {
 func Validate(config Config) error {
 	if config.Prometheus.RemoteWriteURL == "" {
 		return fmt.Errorf("required field 'prometheus.remote_write_url' is not set")
+	}
+	parsedURL, err := url.Parse(config.Prometheus.RemoteWriteURL)
+	if err != nil {
+		return fmt.Errorf("field 'prometheus.remote_write_url' is not a valid URL: %w", err)
+	}
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return fmt.Errorf("field 'prometheus.remote_write_url' must use http or https scheme, got %q", parsedURL.Scheme)
+	}
+	if parsedURL.Host == "" {
+		return fmt.Errorf("field 'prometheus.remote_write_url' is missing a host")
 	}
 	if len(config.Metrics) == 0 {
 		return fmt.Errorf("required field 'metrics' is not set")

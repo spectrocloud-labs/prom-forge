@@ -55,7 +55,7 @@ func (task *Task) Start(ctx context.Context) {
 			val := task.Next(now)
 			log.Debug("tick", "metric", task.Name(), "timestamp", now.Format(time.DateTime), "value", val)
 			if err := task.RemoteWrite(ctx, task.client, val, now); err != nil {
-				log.Debug("tick error", "metric", task.Name(), "error", err)
+				log.Warn("tick error", "metric", task.Name(), "error", err)
 			}
 
 			// add jitter to interval if configured
@@ -83,7 +83,7 @@ func (task *Task) StartTimeMachine(ctx context.Context) {
 		val := task.Next(currentTime)
 		log.Debug("time machine tick", "metric", task.Name(), "timestamp", currentTime.Format(time.DateTime), "value", val)
 		if err := task.RemoteWrite(ctx, task.client, val, currentTime); err != nil {
-			log.Debug("time machine error", "metric", task.Name(), "error", err)
+			log.Warn("time machine error", "metric", task.Name(), "error", err)
 		}
 
 		// #nosec G404
