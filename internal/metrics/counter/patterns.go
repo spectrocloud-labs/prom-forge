@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"time"
+
+	"github.com/spectrocloud-labs/prom-forge/internal/metrics/gauge"
 )
 
 // Pattern is the interface for all patterns.
@@ -77,108 +79,45 @@ func NewRandom(slope, offset, min, max float64) (Pattern, error) {
 	return &Random{Slope: slope, Offset: offset, Min: min, Max: max}, nil
 }
 
-type oscPhase uint8
-
-const (
-	phaseAHold oscPhase = iota
-	phaseARamp
-	phaseBHold
-	phaseBRamp
-)
-
-// Oscillating drives a monotonic counter staircase: hold at A, ramp A→B,
-// hold at B, then ramp B→B′ where B′ = B+(B−A). After that ramp the series
-// must not drop, so the next cycle uses A←B′ and B←B′+Δ (Δ = B−A for the
-// cycle that just finished), not A←B (unlike the gauge oscillation).
+// Oscillating produces a monotonic counter whose per-second growth rate
+// follows a gauge-style oscillation between PhaseAValue and PhaseBValue.
+// The pattern values are interpreted as rate (units/second), and integrated
+// across wall-clock time between samples. As a result, rate(counter[…])
+// over a sliding window will resemble the underlying gauge oscillation.
 type Oscillating struct {
-	PhaseAValue     float64
-	PhaseACount     uint
-	PhaseARampSteps uint
-	PhaseBValue     float64
-	PhaseBCount     uint
-	PhaseBRampSteps uint
-
-	phase oscPhase
-	step  uint
+	inner    gauge.Pattern
+	accum    float64
+	lastTime time.Time
+	started  bool
 }
 
-// Next returns the next value in the oscillation.
-func (o *Oscillating) Next(_ time.Time) float64 {
-	for {
-		switch o.phase {
-		case phaseAHold:
-			if o.step < o.PhaseACount {
-				o.step++
-				return o.PhaseAValue
-			}
-			o.advance(phaseARamp)
-
-		case phaseARamp:
-			if o.PhaseARampSteps == 0 {
-				o.advance(phaseBHold)
-				return o.PhaseBValue
-			}
-			if o.step < o.PhaseARampSteps {
-				o.step++
-				t := float64(o.step) / float64(o.PhaseARampSteps)
-				return o.PhaseAValue + (o.PhaseBValue-o.PhaseAValue)*t
-			}
-			o.advance(phaseBHold)
-
-		case phaseBHold:
-			if o.step < o.PhaseBCount {
-				o.step++
-				return o.PhaseBValue
-			}
-			o.advance(phaseBRamp)
-
-		case phaseBRamp:
-			delta := o.PhaseBValue - o.PhaseAValue
-			nextB := o.PhaseBValue + delta
-			if o.PhaseBRampSteps == 0 {
-				o.PhaseAValue = nextB
-				o.PhaseBValue = nextB + delta
-				o.advance(phaseAHold)
-				return o.PhaseAValue
-			}
-			if o.step < o.PhaseBRampSteps {
-				o.step++
-				t := float64(o.step) / float64(o.PhaseBRampSteps)
-				v := o.PhaseBValue + (nextB-o.PhaseBValue)*t
-				if o.step == o.PhaseBRampSteps {
-					o.PhaseAValue = nextB
-					o.PhaseBValue = nextB + delta
-					o.advance(phaseAHold)
-				}
-				return v
-			}
-		}
+// Next returns the next accumulated counter value.
+func (o *Oscillating) Next(t time.Time) float64 {
+	rate := o.inner.Next(t)
+	if !o.started {
+		o.lastTime = t
+		o.started = true
+		return o.accum
 	}
-}
-
-func (o *Oscillating) advance(next oscPhase) {
-	o.phase = next
-	o.step = 0
-}
-
-// Reset returns the iterator to the beginning of phase A.
-func (o *Oscillating) Reset() {
-	o.phase = phaseAHold
-	o.step = 0
+	dt := t.Sub(o.lastTime).Seconds()
+	if dt < 0 {
+		dt = 0
+	}
+	o.accum += rate * dt
+	o.lastTime = t
+	return o.accum
 }
 func (o *Oscillating) Name() string { return "oscillating" }
 
-// NewOscillating creates a new oscillating staircase pattern for counters.
+// NewOscillating creates a counter pattern whose growth rate oscillates
+// between phaseAValue and phaseBValue (interpreted as units per second).
 func NewOscillating(phaseAValue, phaseBValue float64, phaseACount, phaseARampSteps, phaseBCount, phaseBRampSteps uint) (Pattern, error) {
-	if phaseAValue > phaseBValue {
-		return nil, fmt.Errorf("phase B value must be greater than or equal to phase A value")
+	if phaseAValue < 0 || phaseBValue < 0 {
+		return nil, fmt.Errorf("oscillating phase values must be >= 0 to keep counter monotonic")
 	}
-	if phaseACount+phaseARampSteps+phaseBCount+phaseBRampSteps == 0 {
-		return nil, fmt.Errorf("oscillating pattern must emit at least one sample")
+	inner, err := gauge.NewOscillating(phaseAValue, phaseBValue, phaseACount, phaseARampSteps, phaseBCount, phaseBRampSteps)
+	if err != nil {
+		return nil, err
 	}
-	return &Oscillating{
-		PhaseAValue: phaseAValue, PhaseBValue: phaseBValue,
-		PhaseACount: phaseACount, PhaseARampSteps: phaseARampSteps,
-		PhaseBCount: phaseBCount, PhaseBRampSteps: phaseBRampSteps,
-	}, nil
+	return &Oscillating{inner: inner}, nil
 }

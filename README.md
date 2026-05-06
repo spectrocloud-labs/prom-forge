@@ -7,7 +7,7 @@ Config-driven synthetic metrics generator for Prometheus using remote_write
 1. Run the prometheus agent that we downloaded earlier adding the `--web.enable-remote-write-receiver` flag in order to enable the `/api/v1/write` endpoint that accepts pushed metrics.
 
     ```sh
-    prometheus --config.file prometheus.yaml --web.enable-remote-write-receiver --web.external-url=http://localhost:9090/
+    prometheus --config.file config/prometheus.yaml --web.enable-remote-write-receiver --web.external-url=http://localhost:9090/
     ```
 
 1. Edit the example config in `config/example.yaml` to your liking.
@@ -15,13 +15,13 @@ Config-driven synthetic metrics generator for Prometheus using remote_write
 1. Open a separate terminal in order to run the cli to write metrics to the local prometheus server.
 
     ```sh
-    go run . --config config.example.yaml
+    go run . --config config/example.yaml
     ```
 
 ## Generating Data
 
 ### Generating Data in the Past
-You can generate data in the past. Below is a configuration to generate a steady gpu utilization metric for the past 15m at an interval of 5s plus a random jitter between 0-2s.
+You can generate data in the past. Below is a configuration to generate a steady gpu utilization metric for the past 15m at an interval of 15s plus a random jitter between 0-2s.
 
 ```yaml
 prometheus:
@@ -37,7 +37,7 @@ metrics:
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
   tick: false
-  interval_duration: 5s
+  interval_duration: 15s
   jitter_duration: 2s
   time_machine_duration: 15m
 ```
