@@ -22,8 +22,8 @@ func (s *Steady) Next(t time.Time) float64 {
 	if s.startTime.IsZero() {
 		s.startTime = t
 	}
-	timeElasped := t.Sub(s.startTime).Seconds()
-	return s.Offset + s.Slope*float64(timeElasped)
+	timeElapsed := t.Sub(s.startTime).Seconds()
+	return s.Offset + s.Slope*timeElapsed
 }
 func (s Steady) Name() string { return "steady" }
 
@@ -44,10 +44,10 @@ func (r *Random) Next(t time.Time) float64 {
 	if r.startTime.IsZero() {
 		r.startTime = t
 	}
-	timeElasped := t.Sub(r.startTime).Seconds()
+	timeElapsed := t.Sub(r.startTime).Seconds()
 	// #nosec G404
 	noise := rand.Float64()*(r.Max-r.Min) + r.Min
-	y := r.Slope*timeElasped + r.Offset + noise
+	y := r.Slope*timeElapsed + r.Offset + noise
 	return y
 }
 func (r Random) Name() string { return "random" }

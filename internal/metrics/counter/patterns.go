@@ -25,8 +25,8 @@ func (s *Steady) Next(t time.Time) float64 {
 	if s.startTime.IsZero() {
 		s.startTime = t
 	}
-	timeElasped := t.Sub(s.startTime).Seconds()
-	return s.Offset + s.Slope*float64(timeElasped)
+	timeElapsed := t.Sub(s.startTime).Seconds()
+	return s.Offset + s.Slope*timeElapsed
 }
 func (s Steady) Name() string { return "steady" }
 
@@ -51,10 +51,10 @@ func (r *Random) Next(t time.Time) float64 {
 	if r.startTime.IsZero() {
 		r.startTime = t
 	}
-	timeElasped := t.Sub(r.startTime).Seconds()
+	timeElapsed := t.Sub(r.startTime).Seconds()
 	// #nosec G404
 	noise := rand.Float64()*(r.Max-r.Min) + r.Min
-	y := r.Slope*timeElasped + r.Offset + noise
+	y := r.Slope*timeElapsed + r.Offset + noise
 
 	// Force monotonic increase
 	if r.started && y <= r.lastY {
@@ -93,12 +93,12 @@ type Oscillating struct {
 
 // Next returns the next accumulated counter value.
 func (o *Oscillating) Next(t time.Time) float64 {
-	rate := o.inner.Next(t)
 	if !o.started {
 		o.lastTime = t
 		o.started = true
 		return o.accum
 	}
+	rate := o.inner.Next(t)
 	dt := t.Sub(o.lastTime).Seconds()
 	if dt < 0 {
 		dt = 0

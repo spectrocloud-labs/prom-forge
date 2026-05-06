@@ -12,15 +12,15 @@ prometheus:
     password: ""
 metrics:
   # metric name (required)
-- name: "gpu_utilization"
+- name: "prom_forge_gpu_utilization"
   # the metric type (required)
   type: "gauge"
   # utilization pattern for metric (required)
   utilization_pattern:
     # write a steady value
     steady:
-      slope: -0.5
-      offset: 0.0
+      slope: 0.0
+      offset: 7.0
     # # write a random value as defined by the given linear function and adds random noise in the range [Min, Max] at each point.
     # random:
     #   slope: 0.0
@@ -68,7 +68,7 @@ metrics:
   jitter_duration: 2s
   # generates metrics in the past for the time machine duration (default: 0s)
   time_machine_duration: 5m
-- name: "node_cpu_seconds_total"
+- name: "prom_forge_cpu_seconds_total"
   # the metric type (required)
   type: "counter"
   # utilization pattern for metric (required)
