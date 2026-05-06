@@ -13,6 +13,7 @@ import (
 type Pattern interface {
 	Next(timestamp time.Time) float64
 	Name() string
+	isCounterPattern()
 }
 
 // Steady: counter increases as defined by the given linear function.
@@ -28,7 +29,8 @@ func (s *Steady) Next(t time.Time) float64 {
 	timeElapsed := t.Sub(s.startTime).Seconds()
 	return s.Offset + s.Slope*timeElapsed
 }
-func (s Steady) Name() string { return "steady" }
+func (s Steady) Name() string      { return "steady" }
+func (s Steady) isCounterPattern() {}
 
 // NewSteady creates a new steady pattern.
 func NewSteady(slope, offset float64) (Pattern, error) {
@@ -67,7 +69,8 @@ func (r *Random) Next(t time.Time) float64 {
 	return r.accum
 }
 
-func (r Random) Name() string { return "random" }
+func (r Random) Name() string      { return "random" }
+func (r Random) isCounterPattern() {}
 
 // NewRandom creates a counter pattern whose per-second growth rate is drawn
 // uniformly from [min, max) at each sample. min must be >= 0 to keep the
@@ -110,7 +113,8 @@ func (o *Oscillating) Next(t time.Time) float64 {
 	o.lastTime = t
 	return o.accum
 }
-func (o *Oscillating) Name() string { return "oscillating" }
+func (o *Oscillating) Name() string      { return "oscillating" }
+func (o *Oscillating) isCounterPattern() {}
 
 // NewOscillating creates a counter pattern whose growth rate oscillates
 // between phaseAValue and phaseBValue (interpreted as units per second).

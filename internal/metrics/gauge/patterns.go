@@ -10,6 +10,7 @@ import (
 type Pattern interface {
 	Next(timestamp time.Time) float64
 	Name() string
+	isGaugePattern()
 }
 
 // Steady: gauge increases as defined by the given linear function.
@@ -25,7 +26,8 @@ func (s *Steady) Next(t time.Time) float64 {
 	timeElapsed := t.Sub(s.startTime).Seconds()
 	return s.Offset + s.Slope*timeElapsed
 }
-func (s Steady) Name() string { return "steady" }
+func (s Steady) Name() string    { return "steady" }
+func (s Steady) isGaugePattern() {}
 
 // NewSteady creates a new steady pattern. Negative slopes are allowed since
 // gauges can decrease over time (unlike counters).
@@ -42,7 +44,8 @@ func (r *Random) Next(_ time.Time) float64 {
 	// #nosec G404
 	return rand.Float64()*(r.Max-r.Min) + r.Min
 }
-func (r Random) Name() string { return "random" }
+func (r Random) Name() string    { return "random" }
+func (r Random) isGaugePattern() {}
 
 // NewRandom creates a new random pattern that emits uniform values in [min, max).
 func NewRandom(min, max float64) (Pattern, error) {
@@ -123,7 +126,8 @@ func (o *Oscillating) Reset() {
 	o.phase = phaseAHold
 	o.step = 0
 }
-func (o *Oscillating) Name() string { return "oscillating" }
+func (o *Oscillating) Name() string    { return "oscillating" }
+func (o *Oscillating) isGaugePattern() {}
 
 // NewOscillating creates a new oscillating pattern.
 func NewOscillating(phaseAValue, phaseBValue float64, phaseACount, phaseARampSteps, phaseBCount, phaseBRampSteps uint) (Pattern, error) {
