@@ -1,4 +1,3 @@
-// metrics/counter/patterns.go
 package counter
 
 import (
