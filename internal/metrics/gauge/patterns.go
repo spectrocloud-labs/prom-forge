@@ -27,7 +27,8 @@ func (s *Steady) Next(t time.Time) float64 {
 }
 func (s Steady) Name() string { return "steady" }
 
-// NewSteady creates a new steady pattern.
+// NewSteady creates a new steady pattern. Negative slopes are allowed since
+// gauges can decrease over time (unlike counters).
 func NewSteady(slope, offset float64) (Pattern, error) {
 	return &Steady{Slope: slope, Offset: offset}, nil
 }
@@ -51,7 +52,8 @@ func (r *Random) Next(t time.Time) float64 {
 }
 func (r Random) Name() string { return "random" }
 
-// NewRandom creates a new random pattern.
+// NewRandom creates a new random pattern. Negative slopes are allowed since
+// gauges can decrease over time (unlike counters).
 func NewRandom(slope, offset, min, max float64) (Pattern, error) {
 	if min >= max {
 		return nil, fmt.Errorf("min must be less than max")

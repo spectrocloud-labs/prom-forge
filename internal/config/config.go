@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/spectrocloud-labs/prom-forge/internal"
@@ -149,6 +150,7 @@ func Validate(config Config) error {
 func Default(config *Config) {
 	for i := range config.Metrics {
 		cfgMetric := &config.Metrics[i]
+		cfgMetric.Type = strings.ToLower(cfgMetric.Type)
 		var tick bool = true
 		if cfgMetric.Tick == nil {
 			cfgMetric.Tick = &tick
