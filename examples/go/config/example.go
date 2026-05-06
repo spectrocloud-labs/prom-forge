@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	// Set log level to debug
+	// Set log level of prom-forge to debug
 	log.SetLevel(log.DebugLevel)
 
 	// Set up config

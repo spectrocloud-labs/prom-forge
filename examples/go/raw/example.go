@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	// Set log level if prom-forge to debug
+	// Set log level of prom-forge to debug
 	log.SetLevel(log.DebugLevel)
 
 	// Set up http client
@@ -37,7 +37,7 @@ func main() {
 		panic(err)
 	}
 
-	pattern, err := gauge.NewRandom(10000.0, 100.0)
+	pattern, err := gauge.NewRandom(1.0, 100.0)
 	if err != nil {
 		panic(err)
 	}
