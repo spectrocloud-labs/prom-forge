@@ -83,7 +83,8 @@ metrics:
     #   offset: 0.0
     #   max: 5.0
     #   min: 1.0
-    # # oscillates a monotonic staircase: hold at A, ramp A→B, hold at B, then ramp B→B′ where B′ = B+(B−A)
+    # # oscillates the per-second growth rate of the counter between phase_a.value and phase_b.value (units/second).
+    # # rate(metric[window]) over a sliding window will resemble a gauge oscillation between the two phase values.
     # oscillating:
     #   phase_a:
     #     value: 10.0
