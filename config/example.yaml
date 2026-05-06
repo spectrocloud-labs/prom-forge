@@ -12,18 +12,19 @@ prometheus:
     password: ""
 metrics:
   # metric name (required)
-- name: "gpu_utilization"
+- name: "prom_forge_gpu_utilization"
   # the metric type (required)
   type: "gauge"
   # utilization pattern for metric (required)
   utilization_pattern:
     # write a steady value
     steady:
-      value: 7.0
-    # # write a random value
+      slope: 0.0
+      offset: 7.0
+    # # emit a uniform random value in [min, max) at each sample.
     # random:
-    #   max: 100.0
     #   min: 1.0
+    #   max: 100.0
     # # oscillate between 2 values rapidly
     # oscillating:
     #   phase_a:
@@ -54,6 +55,42 @@ metrics:
     #     value: 100.0
     #     hold_count: 3
     #     ramp_steps: 0
+  # labels for metric (optional)
+  labels:
+    node: edge-ffa238429efe572a777ef4a17e4fd9b7
+  # generate metrics in the present (optional, default: true)
+  tick: true
+  # writes metric at the given interval duration (required)
+  interval_duration: 5s
+  # add jitter between 0 and the given value to the interval duration (default: 0s)
+  jitter_duration: 2s
+  # generates metrics in the past for the time machine duration (default: 0s)
+  time_machine_duration: 5m
+- name: "prom_forge_cpu_seconds_total"
+  # the metric type (required)
+  type: "counter"
+  # utilization pattern for metric (required)
+  utilization_pattern:
+    # write a steady value
+    steady:
+      slope: 0.5
+      offset: 0.0
+    # # counter per-second growth rate is drawn uniformly from [min, max) at each sample.
+    # # rate(metric[window]) over a sliding window resembles uniform(min, max).
+    # random:
+    #   min: 1.0
+    #   max: 5.0
+    # # oscillates the per-second growth rate of the counter between phase_a.value and phase_b.value (units/second).
+    # # rate(metric[window]) over a sliding window will resemble a gauge oscillation between the two phase values.
+    # oscillating:
+    #   phase_a:
+    #     value: 10.0
+    #     hold_count: 5
+    #     ramp_steps: 3
+    #   phase_b:
+    #     value: 20.0
+    #     hold_count: 2
+    #     ramp_steps: 3
   # labels for metric (optional)
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7

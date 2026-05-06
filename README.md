@@ -2,41 +2,26 @@
 Config-driven synthetic metrics generator for Prometheus using remote_write
 
 ## Quick Start
-1. Create a prometheus config.
+1. Download the prometheus agent binary from [here](https://prometheus.io/download/) and move it to your path.
 
-```yaml
-global:
-  scrape_interval: 1s
+1. Run the prometheus agent that we downloaded earlier adding the `--web.enable-remote-write-receiver` flag in order to enable the `/api/v1/write` endpoint that accepts pushed metrics.
 
-scrape_configs:
-  - job_name: "prometheus"
-    static_configs:
-      - targets: ["localhost:9090"]
-        labels:
-          app: "prometheus"
+    ```sh
+    prometheus --config.file config/prometheus.yaml --web.enable-remote-write-receiver --web.external-url=http://localhost:9090/
+    ```
 
-# Note: out_of_order_time_window is required if using `time machine` to allow for concurrent metric writes in the past and present.
-storage:
-  tsdb:
-    out_of_order_time_window: 1d
-```
+1. Edit the example config in `config/example.yaml` to your liking.
 
-1. Run prometheus with the remote_write receiver flag.
-```sh
-./prometheus --config.file prometheus.yml --web.enable-remote-write-receiver
-```
+1. Open a separate terminal in order to run the cli to write metrics to the local prometheus server.
 
-1. Edit the example config `config.example.yaml` to your liking.
-
-1. Run cli.
-```sh
-go run . --config config.example.yaml
-```
+    ```sh
+    go run . --config config/example.yaml
+    ```
 
 ## Generating Data
 
 ### Generating Data in the Past
-You can generate data in the past. Below is a configuration to generate a steady gpu utilization metric for the past 15m at an interval of 5s plus a random jitter between 0-2s.
+You can generate data in the past. Below is a configuration to generate a steady gpu utilization metric for the past 15m at an interval of 15s plus a random jitter between 0-2s.
 
 ```yaml
 prometheus:
@@ -47,11 +32,12 @@ metrics:
   type: "gauge"
   utilization_pattern:
     steady:
-      value: 7.0
+      slope: 0.0
+      offset: 7.0
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
   tick: false
-  interval_duration: 5s
+  interval_duration: 15s
   jitter_duration: 2s
   time_machine_duration: 15m
 ```
@@ -68,7 +54,8 @@ metrics:
   type: "gauge"
   utilization_pattern:
     steady:
-      value: 7.0
+      slope: 0.0
+      offset: 7.0
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
   interval_duration: 5s
@@ -89,7 +76,8 @@ metrics:
   type: "gauge"
   utilization_pattern:
     steady:
-      value: 7.0
+      slope: 0.0
+      offset: 7.0
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
   interval_duration: 5s
@@ -108,7 +96,8 @@ metrics:
   type: "gauge"
   utilization_pattern:
     steady:
-      value: 7.0
+      slope: 0.0
+      offset: 7.0
   labels:
     node: edge-ffa238429efe572a777ef4a17e4fd9b7
   tick: false
@@ -145,14 +134,17 @@ prometheus:
 metrics:
   # metric name (required)
 - name: string
-  # the metric type (required)
-  type: "gauge"
+  # the metric type (required, "gauge" or "counter")
+  type: string
   # utilization pattern for metric (required)
   utilization_pattern:
-    # write a steady value
+    # write a value defined by a linear function: value(t) = offset + slope * elapsed_seconds.
+    # for gauges, slope = units/second of change; slope: 0.0 yields a constant value equal to offset.
+    # for counters, slope = units/second of growth (must be >= 0); slope: 0.0 yields a flat counter at offset.
     steady:
-      value: float64
-    # write a random value
+      slope: float64    # rate of change per second; 0.0 = constant; counters require >= 0
+      offset: float64   # starting value at t=0
+    # write a uniform random value in [min, max) at each sample (counter rate stays in [min, max))
     random:
       max: float64
       min: float64

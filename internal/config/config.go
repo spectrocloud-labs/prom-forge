@@ -2,17 +2,13 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/spectrocloud-labs/prom-forge/internal"
 )
-
-// OpaqueString is a string that is not meant to be logged.
-type OpaqueString string
-
-// String returns the string representation of the OpaqueString.
-func (s OpaqueString) String() string {
-	return "[REDACTED]"
-}
 
 // Config holds application settings loaded from YAML (and env overrides).
 type Config struct {
@@ -30,8 +26,8 @@ type prometheusConfig struct {
 
 // BasicAuth holds basic authentication configuration.
 type BasicAuth struct {
-	Username string       `mapstructure:"username" yaml:"username"`
-	Password OpaqueString `mapstructure:"password" yaml:"password"`
+	Username string                `mapstructure:"username" yaml:"username"`
+	Password internal.OpaqueString `mapstructure:"password" yaml:"password"`
 }
 
 // Metric defines one synthetic metric to emit.
@@ -55,7 +51,8 @@ type utilizationPattern struct {
 
 // SteadyUtilizationPattern defines the steady utilization pattern.
 type SteadyUtilizationPattern struct {
-	Value float64 `mapstructure:"value" yaml:"value"`
+	Slope  float64 `mapstructure:"slope" yaml:"slope"`
+	Offset float64 `mapstructure:"offset" yaml:"offset"`
 }
 
 // RandomUtilizationPattern defines the random utilization pattern.
@@ -67,8 +64,8 @@ type RandomUtilizationPattern struct {
 // oscillationPhase defines one half of oscillation cycle.
 type oscillationPhase struct {
 	Value     float64 `mapstructure:"value" yaml:"value"`
-	HoldCount int     `mapstructure:"hold_count" yaml:"hold_count"`
-	RampSteps int     `mapstructure:"ramp_steps" yaml:"ramp_steps"`
+	HoldCount uint    `mapstructure:"hold_count" yaml:"hold_count"`
+	RampSteps uint    `mapstructure:"ramp_steps" yaml:"ramp_steps"`
 }
 
 // OscillatingUtilizationPattern oscillates between two phases.
@@ -81,6 +78,16 @@ type OscillatingUtilizationPattern struct {
 func Validate(config Config) error {
 	if config.Prometheus.RemoteWriteURL == "" {
 		return fmt.Errorf("required field 'prometheus.remote_write_url' is not set")
+	}
+	parsedURL, err := url.Parse(config.Prometheus.RemoteWriteURL)
+	if err != nil {
+		return fmt.Errorf("field 'prometheus.remote_write_url' is not a valid URL: %w", err)
+	}
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return fmt.Errorf("field 'prometheus.remote_write_url' must use http or https scheme, got %q", parsedURL.Scheme)
+	}
+	if parsedURL.Host == "" {
+		return fmt.Errorf("field 'prometheus.remote_write_url' is missing a host")
 	}
 	if len(config.Metrics) == 0 {
 		return fmt.Errorf("required field 'metrics' is not set")
@@ -115,18 +122,8 @@ func Validate(config Config) error {
 		}
 		if m.UtilizationPattern.Oscillating != nil {
 			utilPatternsSet++
-			p := m.UtilizationPattern.Oscillating
-			if p.PhaseA.HoldCount < 0 || p.PhaseA.RampSteps < 0 || p.PhaseB.HoldCount < 0 || p.PhaseB.RampSteps < 0 {
-				return fmt.Errorf("oscillating hold_count and ramp_steps must be >= 0 for metric %s", m.Name)
-			}
-			if p.PhaseA.HoldCount+p.PhaseA.RampSteps+p.PhaseB.HoldCount+p.PhaseB.RampSteps == 0 {
-				return fmt.Errorf("oscillating pattern must emit at least one sample for metric %s", m.Name)
-			}
 		}
 		if m.UtilizationPattern.Random != nil {
-			if m.UtilizationPattern.Random.Max <= m.UtilizationPattern.Random.Min {
-				return fmt.Errorf("utilization_pattern.random required field 'max' must be greater than required field 'min' for metric %s", m.Name)
-			}
 			utilPatternsSet++
 		}
 
@@ -134,8 +131,10 @@ func Validate(config Config) error {
 			return fmt.Errorf("please set exactly 1 utilization pattern for metric %s", m.Name)
 		}
 
-		switch m.Type {
+		switch strings.ToLower(m.Type) {
 		case "gauge":
+			continue
+		case "counter":
 			continue
 		default:
 			return fmt.Errorf("unknown metric type: %s", m.Type)
@@ -149,6 +148,7 @@ func Validate(config Config) error {
 func Default(config *Config) {
 	for i := range config.Metrics {
 		cfgMetric := &config.Metrics[i]
+		cfgMetric.Type = strings.ToLower(cfgMetric.Type)
 		var tick bool = true
 		if cfgMetric.Tick == nil {
 			cfgMetric.Tick = &tick
