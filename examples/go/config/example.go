@@ -39,16 +39,14 @@ func main() {
 
 	var wg sync.WaitGroup
 	for _, task := range tasks {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			if task.TimeMachineDuration() > 0 {
 				task.StartTimeMachine(ctx)
 			}
 			if task.Tick() {
 				task.Start(ctx)
 			}
-		}()
+		})
 	}
 
 	wg.Wait()

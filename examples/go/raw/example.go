@@ -59,15 +59,12 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	wg := sync.WaitGroup{}
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	var wg sync.WaitGroup
+	wg.Go(func() {
 		log.Info("Starting task")
 		// start task to write metrics to prometheus
 		task.Start(ctx)
-	}()
+	})
 
 	wg.Wait()
 
