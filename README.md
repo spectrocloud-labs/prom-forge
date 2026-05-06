@@ -142,10 +142,8 @@ metrics:
     steady:
       slope: float64
       offset: float64
-    # write a random value
+    # write a uniform random value in [min, max) at each sample (counter rate stays in [min, max))
     random:
-      slope: float64
-      offset: float64
       max: float64
       min: float64
     # oscillate between 2 values

@@ -49,7 +49,7 @@ func CreateTasksFromConfig(config Config, client *remote.API) ([]*task.Task, err
 					return nil, fmt.Errorf("error creating oscillating pattern for metric %s: %w", m.Name, err)
 				}
 			case m.UtilizationPattern.Random != nil:
-				pattern, err = gauge.NewRandom(m.UtilizationPattern.Random.Slope, m.UtilizationPattern.Random.Offset, m.UtilizationPattern.Random.Min, m.UtilizationPattern.Random.Max)
+				pattern, err = gauge.NewRandom(m.UtilizationPattern.Random.Min, m.UtilizationPattern.Random.Max)
 				if err != nil {
 					return nil, fmt.Errorf("error creating random pattern for metric %s: %w", m.Name, err)
 				}
@@ -75,7 +75,7 @@ func CreateTasksFromConfig(config Config, client *remote.API) ([]*task.Task, err
 					return nil, fmt.Errorf("error creating oscillating pattern for metric %s: %w", m.Name, err)
 				}
 			case m.UtilizationPattern.Random != nil:
-				pattern, err = counter.NewRandom(m.UtilizationPattern.Random.Slope, m.UtilizationPattern.Random.Offset, m.UtilizationPattern.Random.Min, m.UtilizationPattern.Random.Max)
+				pattern, err = counter.NewRandom(m.UtilizationPattern.Random.Min, m.UtilizationPattern.Random.Max)
 				if err != nil {
 					return nil, fmt.Errorf("error creating random pattern for metric %s: %w", m.Name, err)
 				}

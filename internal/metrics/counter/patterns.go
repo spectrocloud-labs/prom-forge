@@ -38,45 +38,48 @@ func NewSteady(slope, offset float64) (Pattern, error) {
 	return &Steady{Slope: slope, Offset: offset}, nil
 }
 
-// Random: counter increases as defined by the given linear function and adds random noise in the range [Min, Max) at each point.
+// Random produces a monotonic counter whose per-second growth rate is drawn
+// uniformly from [Min, Max) at each sample. The rate is integrated over
+// wall-clock time between samples, so rate(counter[…]) over a sliding window
+// resembles a uniform distribution in [Min, Max).
 type Random struct {
-	Slope, Offset float64
-	Min, Max      float64
-	startTime     time.Time
-	lastY         float64
-	started       bool
+	Min, Max float64
+	accum    float64
+	lastTime time.Time
+	started  bool
 }
 
+// Next returns the next accumulated counter value.
 func (r *Random) Next(t time.Time) float64 {
-	if r.startTime.IsZero() {
-		r.startTime = t
+	if !r.started {
+		r.lastTime = t
+		r.started = true
+		return r.accum
 	}
-	timeElapsed := t.Sub(r.startTime).Seconds()
+	dt := t.Sub(r.lastTime).Seconds()
+	if dt < 0 {
+		dt = 0
+	}
 	// #nosec G404
-	noise := rand.Float64()*(r.Max-r.Min) + r.Min
-	y := r.Slope*timeElapsed + r.Offset + noise
-
-	// Force monotonic increase
-	if r.started && y <= r.lastY {
-		y = r.lastY + noise + 1e-9
-	}
-
-	r.lastY = y
-	r.started = true
-	return y
+	rate := rand.Float64()*(r.Max-r.Min) + r.Min
+	r.accum += rate * dt
+	r.lastTime = t
+	return r.accum
 }
 
 func (r Random) Name() string { return "random" }
 
-// NewRandom creates a new random pattern.
-func NewRandom(slope, offset, min, max float64) (Pattern, error) {
-	if slope < 0 {
-		return nil, fmt.Errorf("slope must be greater than or equal to 0 for a counter metric")
+// NewRandom creates a counter pattern whose per-second growth rate is drawn
+// uniformly from [min, max) at each sample. min must be >= 0 to keep the
+// counter monotonic.
+func NewRandom(min, max float64) (Pattern, error) {
+	if min < 0 {
+		return nil, fmt.Errorf("min must be >= 0 to keep counter rate non-negative")
 	}
 	if min >= max {
 		return nil, fmt.Errorf("min must be less than max")
 	}
-	return &Random{Slope: slope, Offset: offset, Min: min, Max: max}, nil
+	return &Random{Min: min, Max: max}, nil
 }
 
 // Oscillating produces a monotonic counter whose per-second growth rate

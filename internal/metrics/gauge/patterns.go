@@ -33,32 +33,23 @@ func NewSteady(slope, offset float64) (Pattern, error) {
 	return &Steady{Slope: slope, Offset: offset}, nil
 }
 
-// Random: gauge outputs a value defined by the given linear function and adds random noise in the range [Min, Max) at each point.
+// Random: gauge outputs a uniform random value in [Min, Max) at each sample.
 type Random struct {
-	Slope, Offset float64
-	Min, Max      float64
-	startTime     time.Time
+	Min, Max float64
 }
 
-func (r *Random) Next(t time.Time) float64 {
-	if r.startTime.IsZero() {
-		r.startTime = t
-	}
-	timeElapsed := t.Sub(r.startTime).Seconds()
+func (r *Random) Next(_ time.Time) float64 {
 	// #nosec G404
-	noise := rand.Float64()*(r.Max-r.Min) + r.Min
-	y := r.Slope*timeElapsed + r.Offset + noise
-	return y
+	return rand.Float64()*(r.Max-r.Min) + r.Min
 }
 func (r Random) Name() string { return "random" }
 
-// NewRandom creates a new random pattern. Negative slopes are allowed since
-// gauges can decrease over time (unlike counters).
-func NewRandom(slope, offset, min, max float64) (Pattern, error) {
+// NewRandom creates a new random pattern that emits uniform values in [min, max).
+func NewRandom(min, max float64) (Pattern, error) {
 	if min >= max {
 		return nil, fmt.Errorf("min must be less than max")
 	}
-	return &Random{Slope: slope, Offset: offset, Min: min, Max: max}, nil
+	return &Random{Min: min, Max: max}, nil
 }
 
 type oscPhase uint8

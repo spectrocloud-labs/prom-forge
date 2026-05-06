@@ -57,10 +57,8 @@ type SteadyUtilizationPattern struct {
 
 // RandomUtilizationPattern defines the random utilization pattern.
 type RandomUtilizationPattern struct {
-	Slope  float64 `mapstructure:"slope" yaml:"slope"`
-	Offset float64 `mapstructure:"offset" yaml:"offset"`
-	Max    float64 `mapstructure:"max" yaml:"max"`
-	Min    float64 `mapstructure:"min" yaml:"min"`
+	Max float64 `mapstructure:"max" yaml:"max"`
+	Min float64 `mapstructure:"min" yaml:"min"`
 }
 
 // oscillationPhase defines one half of oscillation cycle.
