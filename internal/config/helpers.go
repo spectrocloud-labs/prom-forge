@@ -29,24 +29,24 @@ func CreateTasksFromConfig(config Config, client *remote.API) ([]*task.Task, err
 		switch m.Type {
 		case "gauge":
 			var (
-				pattern counter.Pattern
+				pattern gauge.Pattern
 				err     error
 			)
 			switch {
 			case m.UtilizationPattern.Steady != nil:
 				pattern, err = gauge.NewSteady(m.UtilizationPattern.Steady.Slope, m.UtilizationPattern.Steady.Offset)
 				if err != nil {
-					return nil, fmt.Errorf("error creating steady pattern for metric %s: %v", m.Name, err)
+					return nil, fmt.Errorf("error creating steady pattern for metric %s: %w", m.Name, err)
 				}
 			case m.UtilizationPattern.Oscillating != nil:
 				pattern, err = gauge.NewOscillating(m.UtilizationPattern.Oscillating.PhaseA.Value, m.UtilizationPattern.Oscillating.PhaseB.Value, uint(m.UtilizationPattern.Oscillating.PhaseA.HoldCount), uint(m.UtilizationPattern.Oscillating.PhaseA.RampSteps), uint(m.UtilizationPattern.Oscillating.PhaseB.HoldCount), uint(m.UtilizationPattern.Oscillating.PhaseB.RampSteps))
 				if err != nil {
-					return nil, fmt.Errorf("error creating oscillating pattern for metric %s: %v", m.Name, err)
+					return nil, fmt.Errorf("error creating oscillating pattern for metric %s: %w", m.Name, err)
 				}
 			case m.UtilizationPattern.Random != nil:
 				pattern, err = gauge.NewRandom(m.UtilizationPattern.Random.Slope, m.UtilizationPattern.Random.Offset, m.UtilizationPattern.Random.Min, m.UtilizationPattern.Random.Max)
 				if err != nil {
-					return nil, fmt.Errorf("error creating random pattern for metric %s: %v", m.Name, err)
+					return nil, fmt.Errorf("error creating random pattern for metric %s: %w", m.Name, err)
 				}
 			}
 
@@ -62,17 +62,17 @@ func CreateTasksFromConfig(config Config, client *remote.API) ([]*task.Task, err
 			case m.UtilizationPattern.Steady != nil:
 				pattern, err = counter.NewSteady(m.UtilizationPattern.Steady.Slope, m.UtilizationPattern.Steady.Offset)
 				if err != nil {
-					return nil, fmt.Errorf("error creating steady pattern for metric %s: %v", m.Name, err)
+					return nil, fmt.Errorf("error creating steady pattern for metric %s: %w", m.Name, err)
 				}
 			case m.UtilizationPattern.Oscillating != nil:
 				pattern, err = counter.NewOscillating(m.UtilizationPattern.Oscillating.PhaseA.Value, m.UtilizationPattern.Oscillating.PhaseB.Value, uint(m.UtilizationPattern.Oscillating.PhaseA.HoldCount), uint(m.UtilizationPattern.Oscillating.PhaseA.RampSteps), uint(m.UtilizationPattern.Oscillating.PhaseB.HoldCount), uint(m.UtilizationPattern.Oscillating.PhaseB.RampSteps))
 				if err != nil {
-					return nil, fmt.Errorf("error creating oscillating pattern for metric %s: %v", m.Name, err)
+					return nil, fmt.Errorf("error creating oscillating pattern for metric %s: %w", m.Name, err)
 				}
 			case m.UtilizationPattern.Random != nil:
 				pattern, err = counter.NewRandom(m.UtilizationPattern.Random.Slope, m.UtilizationPattern.Random.Offset, m.UtilizationPattern.Random.Min, m.UtilizationPattern.Random.Max)
 				if err != nil {
-					return nil, fmt.Errorf("error creating random pattern for metric %s: %v", m.Name, err)
+					return nil, fmt.Errorf("error creating random pattern for metric %s: %w", m.Name, err)
 				}
 			}
 
@@ -101,7 +101,7 @@ func CreateClientFromConfig(config Config) (*remote.API, error) {
 	if config.Prometheus.CaFile != "" {
 		caCert, err := os.ReadFile(config.Prometheus.CaFile)
 		if err != nil {
-			return nil, fmt.Errorf("error reading ca file %s", config.Prometheus.CaFile)
+			return nil, fmt.Errorf("error reading ca file %s: %w", config.Prometheus.CaFile, err)
 		}
 		caCertPool := x509.NewCertPool()
 		if !caCertPool.AppendCertsFromPEM(caCert) {
@@ -126,7 +126,7 @@ func CreateClientFromConfig(config Config) (*remote.API, error) {
 	// create remote API client
 	client, err := remote.NewAPI(config.Prometheus.RemoteWriteURL, remote.WithAPIHTTPClient(httpClient))
 	if err != nil {
-		return nil, fmt.Errorf("error creating prometheus remote API client: %v", err)
+		return nil, fmt.Errorf("error creating prometheus remote API client: %w", err)
 	}
 
 	return client, nil
