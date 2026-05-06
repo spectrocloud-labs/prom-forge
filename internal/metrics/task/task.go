@@ -25,6 +25,15 @@ func New(metric metrics.Metric, intervalDuration time.Duration, jitterDuration t
 	return &Task{Metric: metric, intervalDuration: intervalDuration, jitterDuration: jitterDuration, timeMachineDuration: timeMachineDuration, tick: tick, client: client}
 }
 
+// randomJitter returns a random duration in [0, d). Returns 0 if d <= 0.
+func randomJitter(d time.Duration) time.Duration {
+	if d <= 0 {
+		return 0
+	}
+	// #nosec G404
+	return time.Duration(rand.Int64N(int64(d.Nanoseconds())))
+}
+
 // TimeMachineDuration returns the time machine duration of the task.
 func (task *Task) TimeMachineDuration() time.Duration {
 	return task.timeMachineDuration
@@ -37,8 +46,7 @@ func (task *Task) Tick() bool {
 
 // Start starts the task.
 func (task *Task) Start(ctx context.Context) {
-	// #nosec G404
-	jitterDur := time.Duration(rand.Int64N(int64(task.jitterDuration.Nanoseconds()) + 1))
+	jitterDur := randomJitter(task.jitterDuration)
 
 	ticker := time.NewTicker(task.intervalDuration + jitterDur)
 	defer ticker.Stop() // always stop ticker to free resources
@@ -59,8 +67,7 @@ func (task *Task) Start(ctx context.Context) {
 			}
 
 			// add jitter to interval if configured
-			// #nosec G404
-			jitterDur := time.Duration(rand.Int64N(int64(task.jitterDuration.Nanoseconds()) + 1))
+			jitterDur := randomJitter(task.jitterDuration)
 			ticker.Reset(task.intervalDuration + jitterDur)
 		}
 	}
@@ -86,8 +93,7 @@ func (task *Task) StartTimeMachine(ctx context.Context) {
 			log.Warn("time machine error", "metric", task.Name(), "error", err)
 		}
 
-		// #nosec G404
-		jitterDur := time.Duration(rand.Int64N(int64(task.jitterDuration.Nanoseconds()) + 1))
+		jitterDur := randomJitter(task.jitterDuration)
 		intervalDur := task.intervalDuration + jitterDur
 		currentTime = currentTime.Add(intervalDur)
 	}
