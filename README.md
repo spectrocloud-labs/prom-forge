@@ -8,14 +8,13 @@ Config-driven synthetic metrics generator for Prometheus using remote_write.
 1. Run the prometheus agent that we downloaded earlier adding the `--web.enable-remote-write-receiver` flag in order to enable the `/api/v1/write` endpoint that accepts pushed metrics.
 
     ```sh
-    prometheus --config.file config/prometheus.yaml --web.enable-remote-write-receiver --web.external-url=http://localhost:9090/
+    prometheus --config.file examples/configs/prometheus.yaml --web.enable-remote-write-receiver --web.external-url=http://localhost:9090/
     ```
 
-1. Edit the example config in `config/example.yaml` to your liking.
+### Running Prom-forge
+#### CLI
 
-1. Run prom-forge using either the CLI or API option below.
-
-### CLI
+1. Edit the example config in `examples/configs/example.yaml` to your liking.
 
 1. Open a separate terminal in order to run the cli to write metrics to the local prometheus server.
 
@@ -23,7 +22,7 @@ Config-driven synthetic metrics generator for Prometheus using remote_write.
     go run . --config examples/configs/example.yaml
     ```
 
-### API
+#### API
 
 1. Navigate to [Go examples](./examples/go) in this repository.
 
