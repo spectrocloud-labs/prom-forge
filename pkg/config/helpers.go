@@ -11,11 +11,10 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/prometheus/client_golang/exp/api/remote"
-	"github.com/spectrocloud-labs/prom-forge/internal/client"
-	"github.com/spectrocloud-labs/prom-forge/internal/metrics"
-	"github.com/spectrocloud-labs/prom-forge/internal/metrics/counter"
-	"github.com/spectrocloud-labs/prom-forge/internal/metrics/gauge"
-	"github.com/spectrocloud-labs/prom-forge/internal/metrics/task"
+	"github.com/spectrocloud-labs/prom-forge/pkg/metrics"
+	"github.com/spectrocloud-labs/prom-forge/pkg/metrics/counter"
+	"github.com/spectrocloud-labs/prom-forge/pkg/metrics/gauge"
+	"github.com/spectrocloud-labs/prom-forge/pkg/metrics/task"
 )
 
 // CreateTasksFromConfig creates metric writer tasks from the config.
@@ -120,7 +119,7 @@ func CreateClientFromConfig(config Config) (*remote.API, error) {
 
 	// add basic authentication roundtripper if configured
 	if config.Prometheus.BasicAuth != nil {
-		basicAuthRoundTripper := client.BasicAuthRoundTripper{
+		basicAuthRoundTripper := basicAuthRoundTripper{
 			Username: config.Prometheus.BasicAuth.Username,
 			Password: config.Prometheus.BasicAuth.Password,
 			Next:     transport,

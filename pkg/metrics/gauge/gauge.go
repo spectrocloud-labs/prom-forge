@@ -6,7 +6,6 @@ import (
 
 	"github.com/prometheus/client_golang/exp/api/remote"
 	writev2 "github.com/prometheus/client_golang/exp/api/remote/genproto/v2"
-	"github.com/spectrocloud-labs/prom-forge/internal/metrics"
 )
 
 // GaugeMetric is the main struct for a gauge metric.
@@ -34,5 +33,5 @@ func (g *GaugeMetric) Next(timestamp time.Time) float64 {
 
 // RemoteWrite writes the gauge metric to Prometheus.
 func (g *GaugeMetric) RemoteWrite(ctx context.Context, client *remote.API, metricValue float64, timestamp time.Time) error {
-	return metrics.RemoteWrite(ctx, client, g.name, g.labels, g.metricType, metricValue, timestamp)
+	return metrics.remoteWrite(ctx, client, g.name, g.labels, g.metricType, metricValue, timestamp)
 }

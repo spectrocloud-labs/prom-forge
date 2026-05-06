@@ -6,18 +6,16 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"github.com/spectrocloud-labs/prom-forge/internal"
 )
 
 // Config holds application settings loaded from YAML (and env overrides).
 type Config struct {
-	Prometheus prometheusConfig `mapstructure:"prometheus" yaml:"prometheus"`
-	Metrics    []metric         `mapstructure:"metrics" yaml:"metrics"`
+	Prometheus PrometheusConfig `mapstructure:"prometheus" yaml:"prometheus"`
+	Metrics    []Metric         `mapstructure:"metrics" yaml:"metrics"`
 }
 
 // PrometheusConfig holds Prometheus configuration.
-type prometheusConfig struct {
+type PrometheusConfig struct {
 	RemoteWriteURL     string     `mapstructure:"remote_write_url" yaml:"remote_write_url"`
 	CaFile             string     `mapstructure:"ca_file" yaml:"ca_file"`
 	InsecureSkipVerify bool       `mapstructure:"insecure_skip_verify" yaml:"insecure_skip_verify"`
@@ -26,15 +24,15 @@ type prometheusConfig struct {
 
 // BasicAuth holds basic authentication configuration.
 type BasicAuth struct {
-	Username string                `mapstructure:"username" yaml:"username"`
-	Password internal.OpaqueString `mapstructure:"password" yaml:"password"`
+	Username string       `mapstructure:"username" yaml:"username"`
+	Password OpaqueString `mapstructure:"password" yaml:"password"`
 }
 
 // Metric defines one synthetic metric to emit.
-type metric struct {
+type Metric struct {
 	Name                string             `mapstructure:"name" yaml:"name"`
 	Type                string             `mapstructure:"type" yaml:"type"`
-	UtilizationPattern  utilizationPattern `mapstructure:"utilization_pattern" yaml:"utilization_pattern"`
+	UtilizationPattern  UtilizationPattern `mapstructure:"utilization_pattern" yaml:"utilization_pattern"`
 	Labels              map[string]string  `mapstructure:"labels" yaml:"labels"`
 	Tick                *bool              `mapstructure:"tick" yaml:"tick"`
 	IntervalDuration    time.Duration      `mapstructure:"interval_duration" yaml:"interval_duration"`
@@ -43,7 +41,7 @@ type metric struct {
 }
 
 // UtilizationPattern defines the utilization pattern for a metric.
-type utilizationPattern struct {
+type UtilizationPattern struct {
 	Steady      *SteadyUtilizationPattern      `mapstructure:"steady" yaml:"steady,omitempty"`
 	Oscillating *OscillatingUtilizationPattern `mapstructure:"oscillating" yaml:"oscillating,omitempty"`
 	Random      *RandomUtilizationPattern      `mapstructure:"random" yaml:"random,omitempty"`
@@ -61,8 +59,8 @@ type RandomUtilizationPattern struct {
 	Min float64 `mapstructure:"min" yaml:"min"`
 }
 
-// oscillationPhase defines one half of oscillation cycle.
-type oscillationPhase struct {
+// OscillationPhase defines one half of oscillation cycle.
+type OscillationPhase struct {
 	Value     float64 `mapstructure:"value" yaml:"value"`
 	HoldCount uint    `mapstructure:"hold_count" yaml:"hold_count"`
 	RampSteps uint    `mapstructure:"ramp_steps" yaml:"ramp_steps"`
@@ -70,8 +68,8 @@ type oscillationPhase struct {
 
 // OscillatingUtilizationPattern oscillates between two phases.
 type OscillatingUtilizationPattern struct {
-	PhaseA oscillationPhase `mapstructure:"phase_a" yaml:"phase_a"`
-	PhaseB oscillationPhase `mapstructure:"phase_b" yaml:"phase_b"`
+	PhaseA OscillationPhase `mapstructure:"phase_a" yaml:"phase_a"`
+	PhaseB OscillationPhase `mapstructure:"phase_b" yaml:"phase_b"`
 }
 
 // Validate validates the configuration.

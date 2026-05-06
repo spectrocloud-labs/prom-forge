@@ -6,7 +6,7 @@ import (
 	"math/rand/v2"
 	"time"
 
-	"github.com/spectrocloud-labs/prom-forge/internal/metrics/gauge"
+	"github.com/spectrocloud-labs/prom-forge/pkg/metrics/gauge"
 )
 
 // Pattern is the interface for all patterns.
