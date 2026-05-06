@@ -33,6 +33,11 @@ Config-driven synthetic metrics generator for Prometheus using remote_write.
     go run config/example.go --config ../configs/example.yaml
     ```
 
+1. (Optionally) Import prom-forge into an existing project.
+
+    ```sh
+    go get github.com/spectrocloud-labs/prom-forge@latest
+    ```
 
 ## Generating Data
 
