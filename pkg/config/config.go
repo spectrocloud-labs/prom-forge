@@ -92,8 +92,8 @@ func Validate(config Config) error {
 	}
 
 	if config.Prometheus.CaFile != "" {
-		if _, err := os.ReadFile(config.Prometheus.CaFile); err != nil {
-			return fmt.Errorf("field 'prometheus.ca_file' is set but file was not readable at path %s", config.Prometheus.CaFile)
+		if _, err := os.Stat(config.Prometheus.CaFile); err != nil {
+			return fmt.Errorf("field 'prometheus.ca_file' is set but file was not accessible at path %s: %w", config.Prometheus.CaFile, err)
 		}
 	}
 

@@ -80,7 +80,7 @@ func CreateTasksFromConfig(config Config, client *remote.API) ([]*task.Task, err
 				}
 			}
 
-			metric := counter.New(m.Name, pattern, labels)
+			metric = counter.New(m.Name, pattern, labels)
 			t := task.New(metric, m.IntervalDuration, m.JitterDuration, m.TimeMachineDuration, tick, client)
 			taskList = append(taskList, t)
 		}
@@ -98,7 +98,7 @@ func CreateClientFromConfig(config Config) (*remote.API, error) {
 	}
 
 	// #nosec G402
-	if config.Prometheus.InsecureSkipVerify == true {
+	if config.Prometheus.InsecureSkipVerify {
 		log.Warn("insecure skip verify is enabled in your config")
 	}
 
