@@ -21,12 +21,10 @@ metrics:
     steady:
       slope: 0.0
       offset: 7.0
-    # # write a random value as defined by the given linear function and adds random noise in the range [Min, Max] at each point.
+    # # emit a uniform random value in [min, max) at each sample.
     # random:
-    #   slope: 0.0
-    #   offset: 0.0
-    #   max: 100.0
     #   min: 1.0
+    #   max: 100.0
     # # oscillate between 2 values rapidly
     # oscillating:
     #   phase_a:
@@ -77,12 +75,11 @@ metrics:
     steady:
       slope: 0.5
       offset: 0.0
-    # # write a value that increases as defined by the given linear function and adds random noise in the range [Min, Max] at each point.
+    # # counter per-second growth rate is drawn uniformly from [min, max) at each sample.
+    # # rate(metric[window]) over a sliding window resembles uniform(min, max).
     # random:
-    #   slope: 1.0
-    #   offset: 0.0
-    #   max: 5.0
     #   min: 1.0
+    #   max: 5.0
     # # oscillates the per-second growth rate of the counter between phase_a.value and phase_b.value (units/second).
     # # rate(metric[window]) over a sliding window will resemble a gauge oscillation between the two phase values.
     # oscillating:
