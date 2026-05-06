@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"go.yaml.in/yaml/v3"
 )
 
 // Config holds application settings loaded from YAML (and env overrides).
@@ -70,6 +72,27 @@ type OscillationPhase struct {
 type OscillatingUtilizationPattern struct {
 	PhaseA OscillationPhase `mapstructure:"phase_a" yaml:"phase_a"`
 	PhaseB OscillationPhase `mapstructure:"phase_b" yaml:"phase_b"`
+}
+
+// Load reads a YAML config file at path, applies defaults, and validates it.
+func Load(path string) (Config, error) {
+	var cfg Config
+	data, err := os.ReadFile(path)
+
+	if err != nil {
+		return cfg, fmt.Errorf("read config %s: %w", path, err)
+	}
+
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return cfg, fmt.Errorf("parse config %s: %w", path, err)
+	}
+
+	Default(&cfg)
+	if err := Validate(cfg); err != nil {
+		return cfg, fmt.Errorf("validate config %s: %w", path, err)
+	}
+
+	return cfg, nil
 }
 
 // Validate validates the configuration.
