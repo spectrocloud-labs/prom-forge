@@ -138,10 +138,12 @@ metrics:
   type: string
   # utilization pattern for metric (required)
   utilization_pattern:
-    # write a steady value
+    # write a value defined by a linear function: value(t) = offset + slope * elapsed_seconds.
+    # for gauges, slope = units/second of change; slope: 0.0 yields a constant value equal to offset.
+    # for counters, slope = units/second of growth (must be >= 0); slope: 0.0 yields a flat counter at offset.
     steady:
-      slope: float64
-      offset: float64
+      slope: float64    # rate of change per second; 0.0 = constant; counters require >= 0
+      offset: float64   # starting value at t=0
     # write a uniform random value in [min, max) at each sample (counter rate stays in [min, max))
     random:
       max: float64

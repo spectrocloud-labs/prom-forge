@@ -2,7 +2,7 @@ package gauge
 
 import (
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"time"
 )
 

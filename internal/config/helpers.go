@@ -129,10 +129,10 @@ func CreateClientFromConfig(config Config) (*remote.API, error) {
 	}
 
 	// create remote API client
-	client, err := remote.NewAPI(config.Prometheus.RemoteWriteURL, remote.WithAPIHTTPClient(httpClient))
+	apiClient, err := remote.NewAPI(config.Prometheus.RemoteWriteURL, remote.WithAPIHTTPClient(httpClient))
 	if err != nil {
 		return nil, fmt.Errorf("error creating prometheus remote API client: %w", err)
 	}
 
-	return client, nil
+	return apiClient, nil
 }

@@ -131,7 +131,7 @@ func Validate(config Config) error {
 			return fmt.Errorf("please set exactly 1 utilization pattern for metric %s", m.Name)
 		}
 
-		switch m.Type {
+		switch strings.ToLower(m.Type) {
 		case "gauge":
 			continue
 		case "counter":
