@@ -42,7 +42,10 @@ func main() {
 		panic(err)
 	}
 
-	metric := gauge.New("prom_forge_test_metric", pattern, map[string]string{"purpose": "testing"})
+	metric := gauge.New("example_gauge_random", pattern, map[string]string{
+		"pattern": "random",
+		"service": "demo-service",
+	})
 
 	var (
 		interval    = time.Second * 1
