@@ -11,9 +11,8 @@ import (
 
 	"github.com/charmbracelet/log"
 
-	"github.com/spectrocloud-labs/prom-forge/internal/config"
+	"github.com/spectrocloud-labs/prom-forge/pkg/config"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -30,17 +29,19 @@ var rootCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if err := viper.Unmarshal(&cfg); err != nil {
-			return fmt.Errorf("parse config: %w", err)
+		path := cfgFile
+		if path == "" {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				return fmt.Errorf("home directory: %w", err)
+			}
+			path = filepath.Join(home, ".prom-forge", "config.yaml")
 		}
-
-		// set default values
-		config.Default(&cfg)
-
-		// validate configuration
-		if err := config.Validate(cfg); err != nil {
-			return fmt.Errorf("validate config: %w", err)
+		loaded, err := config.Load(path)
+		if err != nil {
+			return err
 		}
+		cfg = loaded
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -62,16 +63,14 @@ var rootCmd = &cobra.Command{
 		// create and run time machine and tick tasks for each metric
 		var wg sync.WaitGroup
 		for _, task := range tasks {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
+			wg.Go(func() {
 				if task.TimeMachineDuration() > 0 {
 					task.StartTimeMachine(ctx)
 				}
 				if task.Tick() {
 					task.Start(ctx)
 				}
-			}()
+			})
 		}
 
 		// wait for goroutine tasks to cleanup and return
@@ -90,37 +89,14 @@ func Execute() error {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initLog)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default: $HOME/.prom-forge/config.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&logFormat, "format", "f", "text", "format output (text, logfmt, json)")
 	rootCmd.PersistentFlags().Int8VarP(&logLevel, "log-level", "l", 0, "log level (-4: debug, 0: info, 4: warn, 8: error)")
 }
 
-func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			log.Error("home directory", "error", err)
-			os.Exit(1)
-		}
-		viper.AddConfigPath(filepath.Join(home, ".prom-forge"))
-		viper.SetConfigType("yaml")
-		viper.SetConfigName("config")
-	}
-
-	viper.SetEnvPrefix("PROM_FORGE")
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			log.Error("read config", "error", err)
-			os.Exit(1)
-		}
-	}
-
+func initLog() {
 	switch logFormat {
 	case "text":
 		log.SetFormatter(log.TextFormatter)

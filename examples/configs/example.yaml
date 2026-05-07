@@ -1,0 +1,117 @@
+# Example prom-forge configuration showcasing every metric type, pattern, and feature.
+# Run prometheus with: --web.enable-remote-write-receiver
+prometheus:
+  # remote write endpoint (required)
+  remote_write_url: "http://localhost:9090/"
+  # skip TLS certificate verification (optional, default: false)
+  insecure_skip_verify: true
+  # CA certificate file for TLS verification (optional)
+  # ca_file: "custom-ca.crt"
+  # basic auth credentials (optional)
+  # basic_auth:
+  #   username: ""
+  #   password: ""
+
+metrics:
+  # Gauge + steady: linear value over time. value = offset + slope * elapsed_seconds.
+  # Negative slopes allowed (gauges can decrease). slope=0 emits a constant.
+  # Demonstrates: multiple labels for cardinality / filtering.
+  - name: "example_gauge_steady"
+    type: "gauge"
+    utilization_pattern:
+      steady:
+        slope: 0.0
+        offset: 42.0
+    labels:
+      pattern: "steady"
+      service: "demo-service"
+      region: "us-west-1"
+      env: "dev"
+    interval_duration: 5s
+
+  # Gauge + random: uniform random value in [min, max) at each sample.
+  # Demonstrates: jitter_duration adds 0..2s of random jitter to each tick interval
+  # so samples don't land on a perfectly uniform schedule.
+  - name: "example_gauge_random"
+    type: "gauge"
+    utilization_pattern:
+      random:
+        min: 0.0
+        max: 100.0
+    labels:
+      pattern: "random"
+      service: "demo-service"
+    interval_duration: 5s
+    jitter_duration: 2s
+
+  # Gauge + oscillating: holds at A, ramps A->B, holds at B, ramps B->A, repeats.
+  # hold_count = samples held at the value; ramp_steps = samples to interpolate between values.
+  # Demonstrates: time_machine_duration backfills 10 minutes of historical samples on
+  # startup using the same pattern, so dashboards have data immediately. After backfill
+  # the task continues emitting live samples (tick defaults to true).
+  - name: "example_gauge_oscillating"
+    type: "gauge"
+    utilization_pattern:
+      oscillating:
+        phase_a:
+          value: 10.0
+          hold_count: 5
+          ramp_steps: 3
+        phase_b:
+          value: 90.0
+          hold_count: 5
+          ramp_steps: 3
+    labels:
+      pattern: "oscillating"
+      service: "demo-service"
+    interval_duration: 5s
+    time_machine_duration: 10m
+
+  # Counter + steady: monotonic, rate = slope (units/second). slope must be >= 0.
+  - name: "example_counter_steady_total"
+    type: "counter"
+    utilization_pattern:
+      steady:
+        slope: 1.0
+        offset: 0.0
+    labels:
+      pattern: "steady"
+      service: "demo-service"
+    interval_duration: 5s
+
+  # Counter + random: per-second growth rate drawn uniformly from [min, max). min must be >= 0.
+  # rate(metric[window]) resembles uniform(min, max) over the window.
+  # Demonstrates: tick=false combined with time_machine_duration. The task backfills
+  # 30 minutes of historical samples, then exits without emitting live data — useful
+  # for one-off historical fills (load testing, populating empty dashboards, etc).
+  - name: "example_counter_random_total"
+    type: "counter"
+    utilization_pattern:
+      random:
+        min: 0.5
+        max: 5.0
+    labels:
+      pattern: "random"
+      service: "demo-service"
+    tick: false
+    interval_duration: 5s
+    time_machine_duration: 30m
+
+  # Counter + oscillating: per-second growth rate oscillates between phase values.
+  # rate(metric[window]) resembles a gauge oscillation between phase_a.value and phase_b.value.
+  - name: "example_counter_oscillating_total"
+    type: "counter"
+    utilization_pattern:
+      oscillating:
+        phase_a:
+          value: 1.0
+          hold_count: 10
+          ramp_steps: 5
+        phase_b:
+          value: 10.0
+          hold_count: 10
+          ramp_steps: 5
+    labels:
+      pattern: "oscillating"
+      service: "demo-service"
+    interval_duration: 5s

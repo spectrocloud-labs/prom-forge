@@ -1,4 +1,4 @@
-package internal
+package config
 
 // OpaqueString is a string that is not meant to be logged.
 type OpaqueString string

@@ -6,7 +6,7 @@ import (
 
 	"github.com/prometheus/client_golang/exp/api/remote"
 	writev2 "github.com/prometheus/client_golang/exp/api/remote/genproto/v2"
-	"github.com/spectrocloud-labs/prom-forge/internal/metrics"
+	"github.com/spectrocloud-labs/prom-forge/pkg/metrics"
 )
 
 // GaugeMetric is the main struct for a gauge metric.

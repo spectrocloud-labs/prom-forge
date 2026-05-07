@@ -7,7 +7,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/prometheus/client_golang/exp/api/remote"
-	"github.com/spectrocloud-labs/prom-forge/internal/metrics"
+	"github.com/spectrocloud-labs/prom-forge/pkg/metrics"
 )
 
 // Task is a structure for remote writing metrics to prometheus.
